@@ -1,0 +1,12 @@
+# OPTIONAL semantic-intelligence upgrade layer.
+#
+# The engine runs fully without these (deterministic lexical similarity). Install
+# them and set POLICYGUARDIAN_USE_EMBEDDINGS=1 to enable embedding-based
+# near-duplicate / near-conflict recall. Wheels for these may lag new Python
+# releases (e.g. 3.14) — prefer Python 3.11/3.12 for this layer.
+sentence-transformers>=2.7
+spacy>=3.7
+faiss-cpu>=1.8
+scikit-learn>=1.4
+numpy>=1.26
+# After install: python -m spacy download en_core_web_sm
