@@ -38,6 +38,21 @@ def test_wrapped_section_keeps_its_parameter(by_id):
     assert delete.parameters.get("duration_days") == 30
 
 
+def test_leading_subject_noun_does_not_hijack_action():
+    # "Backups"/"Backup" are action words, but the real predicate is the verb
+    # after the modal. Regression guard: the subject noun must not become the action.
+    p = parse_policy(
+        "Section 2.2: Backups must be encrypted at rest using AES-256.\n"
+        "Section 3.1: Backup media must be retained for 30 days.",
+        policy_id="tmp",
+    )
+    obs = extract_obligations(p)
+    actions = {o.action for o in obs}
+    assert "encrypt" in actions
+    assert "retain" in actions
+    assert "backup" not in actions  # the subject noun did not hijack the action
+
+
 def test_should_maps_to_recommended():
     text = "Section 1: Administrators should review the lockout report weekly."
     p = parse_policy(text, policy_id="tmp")

@@ -17,6 +17,22 @@ from .types import Obligation, PolicyInput, Scope
 
 _WORD_RE = re.compile(r"[A-Za-z][A-Za-z/\-]*")
 
+# Modal verbs separate the subject ("Backups") from the predicate verb
+# ("encrypted"). Action detection scans *after* the modal so a leading subject
+# noun that happens to be an action word cannot hijack the obligation's action.
+_MODAL_ANCHORS = {
+    "must", "shall", "should", "may", "required", "prohibited", "recommended",
+    "expected", "encouraged", "permitted", "need", "needs", "will",
+}
+
+# Specific content verbs outrank generic/means verbs so "encrypted using AES"
+# resolves to `encrypt`, not `use`, and "shall not be required ... changes"
+# resolves to `rotate`, not the auxiliary `enforce`.
+_SPECIFIC_ACTIONS = {
+    "rotate", "encrypt", "retain", "delete", "reuse", "classify", "bypass",
+    "backup",
+}
+
 
 def _detect_strength(sentence_lower: str) -> Optional[str]:
     for phrase, strength in L.STRENGTH_MODALS.items():
@@ -41,12 +57,29 @@ def _detect_topic(sentence_lower: str) -> str:
 
 
 def _detect_action(sentence_lower: str) -> str:
-    """Return the first normalized action lemma present, else ``"comply"``."""
-    for token in _WORD_RE.findall(sentence_lower):
-        norm = L.ACTION_SYNONYMS.get(token)
-        if norm:
-            return norm
-    return "comply"
+    """Return the normalized predicate action lemma, else ``"comply"``.
+
+    Takes the last action lemma *after* the first modal verb — which lands on the
+    real predicate across both active ("must rotate passwords") and passive
+    ("Backups must be encrypted", "rotation shall not be required ... changes")
+    voice, without a leading subject noun overriding it.
+    """
+    tokens = _WORD_RE.findall(sentence_lower)
+    anchor = next((i for i, t in enumerate(tokens) if t in _MODAL_ANCHORS), -1)
+    after = tokens[anchor + 1:] if anchor >= 0 else tokens
+
+    def _pick(cands: list[str]) -> Optional[str]:
+        if not cands:
+            return None
+        specific = [c for c in cands if c in _SPECIFIC_ACTIONS]
+        return (specific or cands)[-1]
+
+    action = _pick([L.ACTION_SYNONYMS[t] for t in after if t in L.ACTION_SYNONYMS])
+    if action:
+        return action
+    # Fallback: passive subject-only phrasing where the action precedes the modal.
+    action = _pick([L.ACTION_SYNONYMS[t] for t in tokens if t in L.ACTION_SYNONYMS])
+    return action or "comply"
 
 
 def _detect_scope(sentence_lower: str) -> Scope:

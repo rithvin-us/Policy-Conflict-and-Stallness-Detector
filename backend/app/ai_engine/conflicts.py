@@ -140,7 +140,11 @@ def _classify_contradiction(cid: str, a: Obligation, b: Obligation,
         return _mk(cid, a, b, ctype, sev, expl, conf, res, triggers, scope_note)
 
     both_mandatory = a.strength == T.MANDATORY and b.strength == T.MANDATORY
-    if kind == "POLARITY" and both_mandatory:
+    # Escalate to HIGH only when the scopes are guaranteed to overlap — i.e. one
+    # side is a blanket ("ALL") rule and the other a subset of it (EXCEPTION).
+    # Two distinct specific scopes (DIFFERENT, e.g. backup_media vs eu) may not
+    # overlap at all, so they stay MEDIUM to protect the false-positive rate.
+    if kind == "POLARITY" and both_mandatory and rel == "EXCEPTION":
         # True contradiction over an overlapping population (e.g. cloud passwords).
         ctype = T.TEMPORAL if temporal else T.DIRECT
         sev = T.HIGH
