@@ -1,0 +1,79 @@
+// Thin typed client over the backend REST API. In the browser, requests are
+// same-origin ("/api/...") and proxied to the backend by next.config rewrites.
+
+import type {
+  ComplianceCoverage,
+  Conflict,
+  Connector,
+  GovernanceScore,
+  GraphPayload,
+  Policy,
+  Report,
+  ReviewItem,
+  StalenessFinding,
+  TimelineEvent,
+  WebhookEvent,
+} from "./types";
+
+const BASE =
+  typeof window === "undefined"
+    ? (process.env.BACKEND_INTERNAL_URL || "http://localhost:8000") + "/api/v1"
+    : "/api/v1";
+
+async function req<T>(path: string, init?: RequestInit): Promise<T> {
+  const res = await fetch(`${BASE}${path}`, {
+    ...init,
+    headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(`${res.status} ${path}: ${text.slice(0, 200)}`);
+  }
+  return res.json() as Promise<T>;
+}
+
+type List<T> = { items: T[]; total: number };
+
+export const api = {
+  overview: () => req<GovernanceScore>("/dashboard/overview"),
+  timeline: (limit = 30) => req<{ items: TimelineEvent[] }>(`/timeline?limit=${limit}`),
+  meta: () => req<Record<string, string[]>>("/meta"),
+
+  policies: (q = "") => req<List<Policy>>(`/policies${q}`),
+  policy: (id: string) =>
+    req<Policy & { obligations: any[]; conflicts: Conflict[]; staleness: StalenessFinding[] }>(
+      `/policies/${id}`,
+    ),
+  uploadPolicy: (body: Record<string, unknown>) =>
+    req<Policy>("/policies/upload", { method: "POST", body: JSON.stringify(body) }),
+
+  conflicts: (q = "") => req<List<Conflict>>(`/conflicts${q}`),
+  conflict: (id: string) => req<Conflict>(`/conflicts/${id}`),
+  redundancies: () => req<List<Conflict>>("/redundancies"),
+  staleness: () => req<List<StalenessFinding>>("/staleness"),
+  reviewQueue: () => req<List<ReviewItem>>("/review-queue"),
+
+  graph: (mode: "POLICY" | "OBLIGATION", extra = "") =>
+    req<GraphPayload>(`/graph?mode=${mode}${extra}`),
+
+  compliance: () => req<ComplianceCoverage>("/compliance/coverage"),
+
+  connectors: () => req<List<Connector>>("/connectors"),
+  createConnector: (body: Record<string, unknown>) =>
+    req<Connector>("/connectors", { method: "POST", body: JSON.stringify(body) }),
+  syncConnector: (id: string) =>
+    req<Record<string, unknown>>(`/connectors/${id}/sync`, { method: "POST" }),
+  webhookEvents: () => req<List<WebhookEvent>>("/webhooks/events"),
+
+  runAnalysis: () =>
+    req<Record<string, unknown>>("/analysis/run", { method: "POST", body: "{}" }),
+
+  reports: () => req<List<Report>>("/reports"),
+  createReport: (report_type: string, format: string) =>
+    req<Report>("/reports", {
+      method: "POST",
+      body: JSON.stringify({ report_type, format }),
+    }),
+  reportDownloadUrl: (id: string) => `/api/v1/reports/${id}/download`,
+};
