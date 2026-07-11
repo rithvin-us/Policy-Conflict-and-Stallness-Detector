@@ -22,6 +22,17 @@ export default function ConnectorsPage() {
     }
   }
 
+  async function registerHook(id: string) {
+    setBusy(id);
+    try {
+      const res = await api.registerWebhook(id);
+      connectors.reload();
+      alert(`Webhook registered.\nPOST payloads to: ${res.url}\nEvents: push, pull_request`);
+    } finally {
+      setBusy(null);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -48,7 +59,16 @@ export default function ConnectorsPage() {
                 {c.last_sync ? `Last sync ${new Date(c.last_sync).toLocaleString()}` : "Never synced"}
               </div>
               {c.error_message && <div className="mt-1 text-xs text-severity-high">{c.error_message}</div>}
-              <div className="mt-3 flex justify-end">
+              <div className="mt-3 flex justify-end gap-2">
+                {c.type === "GITHUB" && (
+                  <button
+                    onClick={() => registerHook(c.id)}
+                    disabled={busy === c.id}
+                    className="rounded-lg border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-slate-300 transition hover:bg-white/10 disabled:opacity-40"
+                  >
+                    Register webhook
+                  </button>
+                )}
                 <button
                   onClick={() => sync(c.id)}
                   disabled={busy === c.id || !IMPLEMENTED.has(c.type)}

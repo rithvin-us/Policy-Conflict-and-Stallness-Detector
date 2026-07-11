@@ -2,12 +2,15 @@
 // same-origin ("/api/...") and proxied to the backend by next.config rewrites.
 
 import type {
+  AuditEvent,
   ComplianceCoverage,
   Conflict,
   Connector,
+  GithubStatus,
   GovernanceScore,
   GraphPayload,
   Policy,
+  PolicyVersion,
   Report,
   ReviewItem,
   StalenessFinding,
@@ -68,6 +71,20 @@ export const api = {
   syncConnector: (id: string) =>
     req<Record<string, unknown>>(`/connectors/${id}/sync`, { method: "POST" }),
   webhookEvents: () => req<List<WebhookEvent>>("/webhooks/events"),
+  registerWebhook: (connector_id: string, event_types: string[] = ["push", "pull_request"]) =>
+    req<Record<string, unknown>>("/webhooks/register", {
+      method: "POST",
+      body: JSON.stringify({ connector_id, event_types }),
+    }),
+
+  // Continuous governance / GitHub integration.
+  githubStatus: () => req<GithubStatus>("/github/status"),
+  audit: (q = "") => req<List<AuditEvent>>(`/audit${q}`),
+  reviewAudit: (id: string, body: Record<string, unknown>) =>
+    req<AuditEvent>(`/audit/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
+  policyVersions: (id: string) =>
+    req<List<PolicyVersion>>(`/policies/${id}/versions`),
+  eventStreamUrl: () => "/api/v1/events/stream",
 
   runAnalysis: () =>
     req<Record<string, unknown>>("/analysis/run", { method: "POST", body: "{}" }),

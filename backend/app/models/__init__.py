@@ -137,6 +137,51 @@ class WebhookEvent(Base):
     detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
+class AuditEvent(Base):
+    """Immutable governance audit record.
+
+    One row per policy file touched by a GitHub event (push commit or pull
+    request). Rows are append-only — nothing updates or deletes them — so the
+    trail is a tamper-evident history of every change and its analysis impact.
+    """
+
+    __tablename__ = "audit_events"
+
+    id: Mapped[str] = mapped_column(String, primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow, index=True)
+
+    # Provenance (where the change came from).
+    source: Mapped[str] = mapped_column(String, default="GITHUB", index=True)
+    event_type: Mapped[str] = mapped_column(String, default="push", index=True)
+    repo: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    branch: Mapped[str | None] = mapped_column(String, nullable=True)
+    commit_sha: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    commit_url: Mapped[str | None] = mapped_column(String, nullable=True)
+    author: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    pr_number: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    pr_url: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # Subject of the change.
+    policy_file: Mapped[str] = mapped_column(String, index=True)
+    policy_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True)
+    change_type: Mapped[str] = mapped_column(String, default="modified")  # added/modified/removed
+    old_hash: Mapped[str | None] = mapped_column(String, nullable=True)
+    new_hash: Mapped[str | None] = mapped_column(String, nullable=True)
+
+    # Analysis impact (populated from the engine result after re-analysis).
+    conflict_status: Mapped[str] = mapped_column(String, default="NONE", index=True)
+    duplicate_status: Mapped[str] = mapped_column(String, default="NONE")
+    staleness_status: Mapped[str] = mapped_column(String, default="NONE")
+    compliance_impact: Mapped[list] = mapped_column(JSON, default=list)
+    risk_score: Mapped[float] = mapped_column(Float, default=0.0)
+
+    # Review workflow (future-ready; defaults reflect an unreviewed change).
+    reviewer_status: Mapped[str] = mapped_column(String, default="PENDING", index=True)
+    resolution_status: Mapped[str] = mapped_column(String, default="OPEN", index=True)
+
+    detail: Mapped[str | None] = mapped_column(Text, nullable=True)
+
+
 class Report(Base):
     __tablename__ = "reports"
 

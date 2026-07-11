@@ -26,6 +26,7 @@ from app.models import (
     TimelineEvent,
 )
 from app.risk_scoring import conflict_risk, staleness_risk
+from app.services import events
 
 from .notify import notify_new_high
 
@@ -116,6 +117,11 @@ def run_analysis(db: Session, policy_ids: list[str] | None = None) -> AnalysisRu
 
     high = [c for c in result.conflicts if c.severity == "HIGH"]
     notify_new_high(db, high)
+
+    # Push a live update so connected dashboards refresh without polling.
+    events.publish("analysis_complete", {
+        "overall": result.governance.get("overall"),
+        "counts": counts})
 
     log.info("analysis complete", extra={"extra_fields": {
         "policies": len(policies), "conflicts": counts.get("conflicts"),

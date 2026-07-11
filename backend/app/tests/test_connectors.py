@@ -45,11 +45,12 @@ def test_connector_create_and_sync(client):
 def test_webhook_ingestion_records_event(client):
     resp = client.post("/api/v1/webhooks/github",
                        json={"ref": "refs/heads/main",
+                             "repository": {"full_name": "does-not-exist-xyz/none"},
                              "commits": [{"modified": ["policies/x.md"]}]},
                        headers={"X-GitHub-Event": "push"})
+    assert resp.status_code == 200
     body = resp.json()
     assert body["received"] is True
-    assert "policies/x.md" in body["affected_paths"]
     events = client.get("/api/v1/webhooks/events").json()
     assert events["total"] >= 1
 

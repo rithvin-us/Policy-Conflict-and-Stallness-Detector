@@ -136,6 +136,74 @@ export interface WebhookEvent {
   detail: string | null;
 }
 
+export interface AuditEvent {
+  id: string;
+  created_at: string;
+  source: string;
+  event_type: string;
+  repo: string | null;
+  branch: string | null;
+  commit_sha: string | null;
+  commit_url: string | null;
+  author: string | null;
+  pr_number: number | null;
+  pr_url: string | null;
+  policy_file: string;
+  policy_id: string | null;
+  change_type: string;
+  old_hash: string | null;
+  new_hash: string | null;
+  conflict_status: string;
+  duplicate_status: string;
+  staleness_status: string;
+  compliance_impact: string[];
+  risk_score: number;
+  reviewer_status: string;
+  resolution_status: string;
+  detail: string | null;
+}
+
+export interface LatestCommit {
+  sha: string;
+  url: string;
+  message: string;
+  author: string;
+  date: string;
+}
+
+export interface RepoStatus {
+  connector_id: string;
+  name: string;
+  repo: string | null;
+  branch: string;
+  path: string;
+  status: string;
+  last_sync: string | null;
+  error_message: string | null;
+  webhook_configured: boolean;
+  webhook_events: string[];
+  latest_commit: LatestCommit | null;
+  policy_count: number;
+}
+
+export interface GithubStatus {
+  connected: boolean;
+  signature_verification: boolean;
+  webhook_url: string;
+  repositories: RepoStatus[];
+  recent_changes: AuditEvent[];
+  live_subscribers: number;
+}
+
+export interface PolicyVersion {
+  id: string;
+  policy_id: string;
+  version: string;
+  content_hash: string;
+  created_at: string | null;
+  size: number;
+}
+
 export interface Report {
   id: string;
   report_type: string;

@@ -6,12 +6,13 @@ from sqlalchemy.orm import Session
 
 from app.connectors.base import RawPolicy
 from app.core.db import get_db
-from app.models import Conflict, Obligation, Policy, StalenessFinding
+from app.models import Conflict, Obligation, Policy, PolicyVersion, StalenessFinding
 from app.schemas import (
     PolicyUploadRequest,
     conflict_to_dict,
     obligation_to_dict,
     policy_to_dict,
+    policy_version_to_dict,
     staleness_to_dict,
 )
 from app.services.analysis import run_analysis
@@ -58,6 +59,16 @@ def policy_obligations(policy_id: str, db: Session = Depends(get_db)) -> dict:
         raise HTTPException(404, f"Policy {policy_id} not found")
     rows = db.query(Obligation).filter(Obligation.policy_id == policy_id).all()
     return {"items": [obligation_to_dict(o) for o in rows], "total": len(rows)}
+
+
+@router.get("/policies/{policy_id}/versions")
+def policy_versions(policy_id: str, db: Session = Depends(get_db)) -> dict:
+    if not db.get(Policy, policy_id):
+        raise HTTPException(404, f"Policy {policy_id} not found")
+    rows = (db.query(PolicyVersion)
+            .filter(PolicyVersion.policy_id == policy_id)
+            .order_by(PolicyVersion.created_at.desc()).all())
+    return {"items": [policy_version_to_dict(v) for v in rows], "total": len(rows)}
 
 
 @router.post("/policies/upload", status_code=201)

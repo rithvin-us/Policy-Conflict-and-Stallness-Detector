@@ -79,11 +79,75 @@ class GitHubConnector(BaseConnector):
 
     def fetch(self, ref: dict[str, str]) -> RawPolicy:
         repo = self._repo()
+        # A commit SHA / branch may be pinned per-ref (webhook targeting); fall
+        # back to the connector's configured branch for plain full syncs.
+        gitref = ref.get("ref") or self._branch()
         url = f"{_API}/repos/{repo}/contents/{ref['path']}"
         r = httpx.get(url, headers=self._headers(),
-                      params={"ref": self._branch()}, timeout=15)
+                      params={"ref": gitref}, timeout=15)
         r.raise_for_status()
         data = r.json()
         text = base64.b64decode(data.get("content", "")).decode("utf-8", "replace")
-        return RawPolicy(path=ref["path"], name=ref.get("name", ref["path"]),
-                         text=text, meta={"source": f"github:{repo}"})
+        name = ref.get("name") or ref["path"].rsplit("/", 1)[-1].rsplit(".", 1)[0]
+        return RawPolicy(path=ref["path"], name=name, text=text,
+                         meta={"source": f"github:{repo}", "ref": gitref})
+
+    def is_policy_path(self, path: str) -> bool:
+        """True when ``path`` is a policy file inside the connector's tree."""
+        base = self._path()
+        if base and not (path == base or path.startswith(base + "/")):
+            return False
+        return path.lower().endswith(_EXTS)
+
+    def latest_commit(self) -> dict[str, str] | None:
+        """Return ``{sha, url, message, author, date}`` for HEAD of the branch.
+
+        Best-effort — network/HTTP failures return ``None`` so status views
+        degrade gracefully rather than error (SRS NFR-5).
+        """
+        repo = self._repo()
+        if not repo:
+            return None
+        try:
+            r = httpx.get(f"{_API}/repos/{repo}/commits",
+                          headers=self._headers(),
+                          params={"sha": self._branch(), "per_page": 1}, timeout=10)
+            r.raise_for_status()
+            items = r.json()
+        except (httpx.HTTPError, ValueError):
+            return None
+        if not items:
+            return None
+        c = items[0]
+        commit = c.get("commit", {})
+        return {
+            "sha": c.get("sha", ""),
+            "url": c.get("html_url", ""),
+            "message": (commit.get("message") or "").split("\n", 1)[0],
+            "author": (commit.get("author") or {}).get("name", ""),
+            "date": (commit.get("author") or {}).get("date", ""),
+        }
+
+    def pull_request_files(self, number: int) -> list[str]:
+        """List file paths changed in a pull request (paginated GitHub API)."""
+        repo = self._repo()
+        if not repo:
+            return []
+        paths: list[str] = []
+        page = 1
+        while True:
+            try:
+                r = httpx.get(f"{_API}/repos/{repo}/pulls/{number}/files",
+                              headers=self._headers(),
+                              params={"per_page": 100, "page": page}, timeout=15)
+                r.raise_for_status()
+                items = r.json()
+            except (httpx.HTTPError, ValueError):
+                break
+            if not items:
+                break
+            paths.extend(it["filename"] for it in items if "filename" in it)
+            if len(items) < 100:
+                break
+            page += 1
+        return paths

@@ -44,6 +44,11 @@ class Settings:
     # Optional GitHub token for the GitHub connector (never persisted).
     GITHUB_TOKEN = os.getenv("GITHUB_TOKEN", "")
 
+    # Shared secret configured on the GitHub webhook. When set, every inbound
+    # webhook must carry a valid ``X-Hub-Signature-256`` HMAC or it is rejected
+    # (401). Empty => signature check skipped (local development convenience).
+    GITHUB_WEBHOOK_SECRET = os.getenv("GITHUB_WEBHOOK_SECRET", "")
+
     CORS_ORIGINS = os.getenv(
         "CORS_ORIGINS", "http://localhost:3000,http://127.0.0.1:3000"
     ).split(",")

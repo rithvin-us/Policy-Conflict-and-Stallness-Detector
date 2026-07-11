@@ -1,4 +1,4 @@
-# Architecture — Policy Guardian AI
+x# Architecture — Policy Guardian AI
 
 ## 1. System context
 

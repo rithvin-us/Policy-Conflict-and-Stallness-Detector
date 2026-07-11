@@ -11,6 +11,7 @@ const NAV = [
   { href: "/policies", label: "Policies", glyph: "▤" },
   { href: "/compliance", label: "Compliance", glyph: "✓" },
   { href: "/connectors", label: "Sources & Webhooks", glyph: "⇄" },
+  { href: "/governance", label: "Governance", glyph: "◉" },
   { href: "/reports", label: "Reports", glyph: "⭳" },
 ];
 

@@ -29,6 +29,15 @@ def _slug(name: str) -> str:
     return "pol-" + re.sub(r"[^a-z0-9]+", "-", name.lower()).strip("-")[:40]
 
 
+def policy_slug(name: str) -> str:
+    """Public: the stable Policy id ingestion assigns to a file/display name.
+
+    Lets callers (e.g. the GitHub sync) look up the pre-change policy — to
+    capture its old content hash — before re-ingesting the new text.
+    """
+    return _slug(name)
+
+
 def _timeline(db: Session, kind: str, policy: Policy, detail: str) -> None:
     db.add(TimelineEvent(id=new_id("tl"), kind=kind, policy_id=policy.id,
                          title=policy.title, detail=detail))

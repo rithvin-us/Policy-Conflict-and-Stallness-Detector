@@ -40,6 +40,11 @@ class AnalysisRunRequest(BaseModel):
     policy_ids: Optional[list[str]] = None
 
 
+class AuditReviewRequest(BaseModel):
+    reviewer_status: Optional[str] = None   # PENDING | ACKNOWLEDGED | REVIEWED
+    resolution_status: Optional[str] = None  # OPEN | IN_PROGRESS | RESOLVED | PREVIEW
+
+
 class ReportCreateRequest(BaseModel):
     report_type: str = "POLICY_HEALTH"
     format: str = "MARKDOWN"
@@ -168,4 +173,44 @@ def timeline_to_dict(t: "models.TimelineEvent") -> dict[str, Any]:
         "policy_id": t.policy_id,
         "title": t.title,
         "detail": t.detail,
+    }
+
+
+def audit_to_dict(a: "models.AuditEvent") -> dict[str, Any]:
+    return {
+        "id": a.id,
+        "created_at": _iso(a.created_at),
+        "source": a.source,
+        "event_type": a.event_type,
+        "repo": a.repo,
+        "branch": a.branch,
+        "commit_sha": a.commit_sha,
+        "commit_url": a.commit_url,
+        "author": a.author,
+        "pr_number": a.pr_number,
+        "pr_url": a.pr_url,
+        "policy_file": a.policy_file,
+        "policy_id": a.policy_id,
+        "change_type": a.change_type,
+        "old_hash": a.old_hash,
+        "new_hash": a.new_hash,
+        "conflict_status": a.conflict_status,
+        "duplicate_status": a.duplicate_status,
+        "staleness_status": a.staleness_status,
+        "compliance_impact": a.compliance_impact or [],
+        "risk_score": a.risk_score,
+        "reviewer_status": a.reviewer_status,
+        "resolution_status": a.resolution_status,
+        "detail": a.detail,
+    }
+
+
+def policy_version_to_dict(v: "models.PolicyVersion") -> dict[str, Any]:
+    return {
+        "id": v.id,
+        "policy_id": v.policy_id,
+        "version": v.version,
+        "content_hash": v.content_hash,
+        "created_at": _iso(v.created_at),
+        "size": len(v.raw_text or ""),
     }
