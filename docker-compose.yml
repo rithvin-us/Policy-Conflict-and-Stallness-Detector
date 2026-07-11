@@ -1,0 +1,60 @@
+# Full-stack Policy Guardian AI: Postgres + Redis + FastAPI + Next.js.
+# Usage:  docker compose up --build
+# Then:   web  -> http://localhost:3000   api -> http://localhost:8000/docs
+name: policy-guardian
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: policy
+      POSTGRES_PASSWORD: policy
+      POSTGRES_DB: policyguardian
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U policy -d policyguardian"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      DATABASE_URL: postgresql+psycopg://policy:policy@db:5432/policyguardian
+      REDIS_URL: redis://redis:6379/0
+      SEED_ON_STARTUP: "1"
+      SEED_POLICY_DIR: /sample_data/policies
+      ANALYSIS_AS_OF: "2026-07-11"
+      CORS_ORIGINS: http://localhost:3000
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  web:
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    environment:
+      BACKEND_INTERNAL_URL: http://api:8000
+    depends_on:
+      - api
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
