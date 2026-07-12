@@ -13,14 +13,35 @@ BACKEND_DIR = Path(__file__).resolve().parents[2]
 REPO_ROOT = BACKEND_DIR.parent
 
 
+def _normalize_db_url(url: str) -> str:
+    """Coerce a Postgres DSN onto the installed driver (psycopg 3).
+
+    Render (and Heroku-style providers) inject ``DATABASE_URL`` as
+    ``postgres://`` or ``postgresql://`` with no driver suffix. SQLAlchemy maps
+    both to the psycopg2 dialect, which is *not* installed — only ``psycopg``
+    (v3) is in requirements — so the app would crash on boot. Rewrite the scheme
+    to the explicit ``postgresql+psycopg://`` dialect. SQLite and already-qualified
+    URLs pass through untouched.
+    """
+    if url.startswith("postgres://"):
+        return "postgresql+psycopg://" + url[len("postgres://"):]
+    if url.startswith("postgresql://"):
+        return "postgresql+psycopg://" + url[len("postgresql://"):]
+    # SingleStore: accept the short scheme and target the installed dialect.
+    if url.startswith("singlestore://"):
+        return "singlestoredb://" + url[len("singlestore://"):]
+    return url
+
+
 class Settings:
     APP_NAME = "Policy Guardian AI"
     VERSION = "1.0.0"
     API_PREFIX = "/api/v1"
 
     # SQLite by default; set DATABASE_URL to a Postgres DSN in production.
-    DATABASE_URL = os.getenv(
-        "DATABASE_URL", f"sqlite:///{BACKEND_DIR / 'policyguardian.db'}"
+    # Normalized so a bare Render/Heroku ``postgres(ql)://`` DSN targets psycopg 3.
+    DATABASE_URL = _normalize_db_url(
+        os.getenv("DATABASE_URL", f"sqlite:///{BACKEND_DIR / 'policyguardian.db'}")
     )
 
     # Redis/Celery are optional — absent => synchronous in-process execution.

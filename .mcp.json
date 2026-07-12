@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "singlestore": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "singlestore-mcp-server"
+      ],
+      "env": {}
+    }
+  }
+}

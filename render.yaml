@@ -1,3 +1,5 @@
+# Render Blueprint — Policy Conflict & Staleness Detector (PCSD)
+# Topology: Frontend (Vercel) -> Backend API (this service, Render) -> SingleStore (DB).
 services:
   - type: web
     name: policy-guardian-backend
@@ -11,7 +13,16 @@ services:
         value: 3.12.0
       - key: SEED_ON_STARTUP
         value: "1"
+      # SingleStore connection string. Kept out of git — set it in the Render
+      # dashboard (Environment tab). Format:
+      #   singlestoredb://<user>:<password>@<host>:3306/policyguardian?ssl_disabled=False
+      # The app normalizes a short singlestore:// scheme to the singlestoredb dialect.
+      - key: DATABASE_URL
+        sync: false
+      # Frontend origin(s) allowed by CORS — set to the Vercel deployment URL.
       - key: CORS_ORIGINS
         value: "https://your-frontend-project.vercel.app" # UPDATE THIS IN RENDER DASHBOARD
       - key: GITHUB_TOKEN
         value: "" # Optional: Add your PAT here in the Render dashboard
+      - key: GITHUB_WEBHOOK_SECRET
+        sync: false # Set in the Render dashboard; enables inbound webhook HMAC verification
