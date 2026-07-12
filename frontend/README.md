@@ -1,4 +1,4 @@
-# Policy Guardian AI — Frontend
+# Sentinal — Frontend
 
 Next.js 14 (App Router) + TypeScript + Tailwind + Framer Motion + React Flow +
 Recharts. A dark "policy operations console" — deliberately not a generic SaaS

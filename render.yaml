@@ -1,4 +1,4 @@
-# Render Blueprint — Policy Conflict & Staleness Detector (PCSD)
+# Render Blueprint — Sentinal (PCSD)
 # Topology: Frontend (Vercel) -> Backend API (this service, Render) -> SingleStore (DB).
 services:
   - type: web

@@ -1,6 +1,6 @@
 # GitHub Integration — Continuous Policy Governance
 
-This document describes the GitHub monitoring layer that turns Policy Guardian AI
+This document describes the GitHub monitoring layer that turns Sentinal
 from *manual upload* into *continuous governance*. It is an **extension** of the
 existing platform — the connector framework, ingestion/versioning pipeline, the
 deterministic AI engine, and the dashboard are all reused unchanged. Nothing here

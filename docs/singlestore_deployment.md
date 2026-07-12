@@ -1,6 +1,6 @@
 # Deployment: Vercel (frontend) → Render (backend) → SingleStore (database)
 
-Topology for the Policy Conflict & Staleness Detector (PCSD):
+Topology for the Sentinal (PCSD):
 
 ```
  Browser ──▶ Vercel (Next.js frontend) ──▶ Render (FastAPI backend) ──▶ SingleStore (durable DB)

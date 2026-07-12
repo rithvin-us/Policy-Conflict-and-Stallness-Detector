@@ -1,4 +1,4 @@
-"""Core value types for the Policy Guardian AI engine.
+"""Core value types for the Sentinal engine.
 
 Pure standard-library dataclasses that mirror ``docs/data-dictionary.md``. The
 engine never imports FastAPI, SQLAlchemy, or any ML library at module load time,

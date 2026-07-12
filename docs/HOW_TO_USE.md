@@ -1,9 +1,9 @@
-# How to Use Policy Guardian AI
+# How to Use Sentinal
 
-A step-by-step guide to running, exploring, and demoing **Policy Guardian AI** —
+A step-by-step guide to running, exploring, and demoing **Sentinal** —
 the continuous policy conflict, redundancy, and staleness detector.
 
-> Originally built for the *Policy Conflict & Staleness Detector* challenge brief (Société Générale).
+> Originally built for the *Sentinal* challenge brief (Société Générale).
 
 > For system design details see `docs/architecture.md`, `docs/SRS.md`, and
 > `docs/api-contracts.md`. This file is the practical "how do I run and use it"
@@ -15,7 +15,7 @@ the continuous policy conflict, redundancy, and staleness detector.
 
 Enterprises accumulate dozens of security and compliance policies written by
 different teams over many years. They silently contradict each other, duplicate
-each other, and go stale. Policy Guardian AI ingests your policy corpus,
+each other, and go stale. Sentinal ingests your policy corpus,
 extracts every obligation ("must / shall / should ..."), and automatically
 detects **conflicts**, **redundancy**, and **staleness** — with an explainable,
 evidence-backed reason and a suggested resolution for every finding, plus a
@@ -228,4 +228,4 @@ open  localhost:8000/docs                                    # interactive OpenA
 
 ---
 
-*Policy Guardian AI* — Continuous policy governance and compliance intelligence platform. See `README.md` for the executive/technical summary and `docs/roadmap.md` for what's next. Originally developed for the Policy Conflict & Staleness Detector challenge brief.
+*Sentinal* — Continuous policy governance and compliance intelligence platform. See `README.md` for the executive/technical summary and `docs/roadmap.md` for what's next. Originally developed for the Sentinal challenge brief.

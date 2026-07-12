@@ -1,4 +1,4 @@
-# Roadmap — Policy Guardian AI
+# Roadmap — Sentinal
 
 ## Now (hackathon build — shipped & runnable)
 - Ingestion (GitHub, Local Folder, Upload) + normalization + versioning

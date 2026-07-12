@@ -1,4 +1,4 @@
-# API Contracts — Policy Guardian AI
+# API Contracts — Sentinal
 
 > **Status:** FROZEN CONTRACT v1. Base path `/api/v1`. Every response is JSON.
 > Agent D consumes these exact shapes; Agent B implements them; Agent C's engine

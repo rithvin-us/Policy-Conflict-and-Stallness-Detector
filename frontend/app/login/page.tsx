@@ -35,7 +35,7 @@ export default function LoginPage() {
         </div>
 
         <h1 className="text-2xl font-semibold text-black text-center mb-2 tracking-tight">
-          Welcome to Policy Guardian
+          Welcome to Sentinal
         </h1>
         <p className="text-black text-center text-sm mb-8">
           Enterprise Policy Conflict & Governance Platform

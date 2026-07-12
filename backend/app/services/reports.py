@@ -32,7 +32,7 @@ def _build_markdown(db: Session, report_type: str) -> tuple[str, dict]:
     titles = _policy_titles(db)
     run = latest_run(db)
     gov = run.governance if run else {}
-    lines: list[str] = [f"# Policy Guardian AI — {report_type.replace('_', ' ').title()} Report",
+    lines: list[str] = [f"# Sentinal — {report_type.replace('_', ' ').title()} Report",
                         "", f"_Generated: {_now()}_", ""]
     summary: dict = {}
 
@@ -88,7 +88,7 @@ def _build_markdown(db: Session, report_type: str) -> tuple[str, dict]:
 def _markdown_to_html(md: str) -> str:
     body = html.escape(md).replace("\n", "<br>\n")
     return (f"<!doctype html><html><head><meta charset='utf-8'>"
-            f"<title>Policy Guardian Report</title>"
+            f"<title>Sentinal Report</title>"
             f"<style>body{{font-family:ui-sans-serif,system-ui;max-width:820px;"
             f"margin:40px auto;color:#111;line-height:1.5}}</style></head>"
             f"<body>{body}</body></html>")

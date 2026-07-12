@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🛡️ Policy Guardian AI
+# 🛡️ Sentinal
 
 **Continuous Policy Governance & Compliance Intelligence Platform**
 
@@ -23,7 +23,7 @@
 
 Enterprises accumulate dozens of security & compliance policies written by different teams over many years. **They silently contradict each other** — one policy says *"rotate passwords every 90 days"*, another says *"do not rotate passwords; enforce MFA"* — and nobody notices until an auditor does.
 
-**Policy Guardian AI finds those conflicts before the auditor, continuously.**
+**Sentinal finds those conflicts before the auditor, continuously.**
 
 ### Key Capabilities
 
@@ -653,7 +653,7 @@ This project is licensed under the **MIT License** — see [LICENSE](LICENSE) fo
 
 ## 🎯 Executive Summary
 
-Policy Guardian AI turns a pile of contradictory, aging policies into a ranked, evidenced findings list a compliance manager can act on in minutes — collapsing the ~20 hours/quarter spent manually reconciling policies, and eliminating the "conflicting policy" audit finding before the auditor arrives. Every alert is explainable and cites the exact policy text, so owners trust it and fix it fast.
+Sentinal turns a pile of contradictory, aging policies into a ranked, evidenced findings list a compliance manager can act on in minutes — collapsing the ~20 hours/quarter spent manually reconciling policies, and eliminating the "conflicting policy" audit finding before the auditor arrives. Every alert is explainable and cites the exact policy text, so owners trust it and fix it fast.
 
 ## 📞 Support & Resources
 

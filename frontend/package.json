@@ -2,7 +2,7 @@
   "name": "policy-guardian-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Policy Guardian AI — policy operations console",
+  "description": "Sentinal — policy operations console",
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -1,5 +1,5 @@
 # Software Requirements Specification
-## Policy Guardian AI — Continuous Policy Governance & Compliance Intelligence Platform
+## Sentinal — Continuous Policy Governance & Compliance Intelligence Platform
 
 **Document version:** 1.0
 **Standard:** IEEE 830-1998 (adapted)
@@ -11,7 +11,7 @@
 ## 1. Introduction
 
 ### 1.1 Purpose
-This SRS specifies the requirements for **Policy Guardian AI**, a platform that
+This SRS specifies the requirements for **Sentinal**, a platform that
 continuously ingests enterprise security and compliance policies, extracts the
 obligations they contain, and detects **conflicts, redundancies, staleness, and
 compliance-coverage gaps** across the entire policy corpus. It is written for
@@ -25,7 +25,7 @@ passwords; enforce MFA"), silent redundancy, and stale references to deprecated
 technology (TLS 1.0, SHA-1, Windows Server 2012) create real audit and legal
 exposure. Today these are found by auditors, not before them.
 
-Policy Guardian AI closes that gap. It provides:
+Sentinal closes that gap. It provides:
 - Automated, explainable detection of policy conflicts and overlaps.
 - Staleness surveillance tied to review cadence and deprecated-tech references.
 - A policy knowledge graph (whole-policy and obligation-level views).
@@ -45,14 +45,14 @@ See `docs/data-dictionary.md` for the frozen entity contract. Key terms:
 - NIST SP 800-63B — Digital Identity Guidelines (password rotation guidance)
 - EU GDPR Articles 5, 17, 24
 - COBIT 2019 — APO01 Maintain Policy Framework
-- Challenge brief source: *Policy Conflict & Staleness Detector* (Société Générale)
+- Challenge brief source: *Sentinal* (Société Générale)
 
 ---
 
 ## 2. Overall Description
 
 ### 2.1 Product Perspective
-Policy Guardian AI is a self-contained web platform composed of four tiers:
+Sentinal is a self-contained web platform composed of four tiers:
 
 ```
  Sources ──► Connector Framework ──► Ingestion & Normalization ──► Policy Store

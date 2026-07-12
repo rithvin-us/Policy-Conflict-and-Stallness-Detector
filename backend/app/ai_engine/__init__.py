@@ -1,4 +1,4 @@
-"""Policy Guardian AI — policy intelligence engine.
+"""Sentinal — policy intelligence engine.
 
 Deterministic, standard-library-only core. Optional ML (sentence-transformers /
 spaCy / FAISS / scikit-learn) upgrades similarity when installed and enabled, but

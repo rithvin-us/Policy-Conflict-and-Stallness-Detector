@@ -7,7 +7,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
-  title: "Policy Guardian AI — Governance Console",
+  title: "Sentinal — Governance Console",
   description:
     "Continuous policy governance & compliance intelligence: conflicts, redundancy, staleness.",
 };

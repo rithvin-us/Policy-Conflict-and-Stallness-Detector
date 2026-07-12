@@ -54,7 +54,7 @@ def test_report_generation_and_download(client):
     assert r.status_code == 201
     rid = r.json()["id"]
     dl = client.get(f"/api/v1/reports/{rid}/download")
-    assert dl.status_code == 200 and b"Policy Guardian" in dl.content
+    assert dl.status_code == 200 and b"Sentinal" in dl.content
 
 
 def test_review_queue_ranked_by_risk(client):

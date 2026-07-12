@@ -1,4 +1,4 @@
-# Demo Video Script — Policy Guardian AI
+# Demo Video Script — Sentinal
 
 **Format:** live screen recording, single take preferred (record in segments and
 cut together if easier). **Target length:** 3.5–4 minutes.
@@ -15,7 +15,7 @@ say (read naturally, don't rush), and a **(time)** cue.
 ## 0:00–0:20 — Hook + problem
 
 **[ON SCREEN]** Start on a plain slide or the README on GitHub — title
-"Policy Guardian AI." Then cut to the two conflicting policy excerpts side by
+"Sentinal." Then cut to the two conflicting policy excerpts side by
 side (screenshot or the actual markdown files):
 `password_policy.md` Section 3.1 and `cloud_security_policy.md` Section 5.2.
 
@@ -24,7 +24,7 @@ side (screenshot or the actual markdown files):
 > teams, over different years. Here's a real example: one policy says 'rotate
 > your password every 90 days.' Another says 'don't rotate passwords — MFA
 > replaces that.' Nobody notices the contradiction until an auditor does. We
-> built Policy Guardian AI to catch this automatically, continuously, before
+> built Sentinal to catch this automatically, continuously, before
 > the auditor does."
 
 ---
@@ -35,7 +35,7 @@ side (screenshot or the actual markdown files):
 Overview page. Let the governance gauge and severity chart render.
 
 **"VOICEOVER":**
-> "Policy Guardian AI ingests your whole policy corpus — from GitHub, a local
+> "Sentinal ingests your whole policy corpus — from GitHub, a local
 > folder, or manual upload — extracts every obligation, and detects conflicts,
 > redundancy, and staleness. Every finding is explainable: it cites the exact
 > triggering text and suggests a resolution. This is the Governance Overview —
@@ -85,7 +85,7 @@ finding on the Password Policy and its "last reviewed 2021" age badge.
 **"VOICEOVER":**
 > "Conflicts aren't the only risk — policies also just... age. The Password
 > Policy here was last reviewed in 2021 and still references SHA-1 for
-> password hashing, a deprecated algorithm. Policy Guardian flags review-
+> password hashing, a deprecated algorithm. Sentinal flags review-
 > overdue policies, deprecated tech references, superseded standards, and
 > orphaned owners automatically, with a recommendation for each."
 
@@ -120,7 +120,7 @@ Text: Section 1: All employees must rotate their passwords every 60 days.
 **"VOICEOVER":**
 > "And this isn't a static demo — let's add a brand-new policy live. I'll
 > paste in a Remote Access Policy that requires a 60-day password rotation...
-> and submit. Within seconds, Policy Guardian re-analyzes the whole corpus and
+> and submit. Within seconds, Sentinal re-analyzes the whole corpus and
 > — there it is — a new conflict against the existing 90-day rule, fully
 > explained, no human had to spot it."
 
@@ -137,7 +137,7 @@ or the PPT slide). Optionally show `/docs` Swagger UI for one second.
 > operations console, fully Dockerized with CI and 37 passing tests. It's
 > built to collapse the twenty-plus hours compliance teams spend every quarter
 > manually reconciling policies into a five-minute review of a ranked findings
-> list. That's Policy Guardian AI."
+> list. That's Sentinal."
 
 **[ON SCREEN]** End card: project name, GitHub link, team name.
 

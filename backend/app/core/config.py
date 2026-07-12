@@ -34,7 +34,7 @@ def _normalize_db_url(url: str) -> str:
 
 
 class Settings:
-    APP_NAME = "Policy Guardian AI"
+    APP_NAME = "Sentinal"
     VERSION = "1.0.0"
     API_PREFIX = "/api/v1"
 

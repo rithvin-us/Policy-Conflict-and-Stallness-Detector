@@ -1,4 +1,4 @@
-# Full-stack Policy Guardian AI: Postgres + Redis + FastAPI + Next.js.
+# Full-stack Sentinal: Postgres + Redis + FastAPI + Next.js.
 # Usage:  docker compose up --build
 # Then:   web  -> http://localhost:3000   api -> http://localhost:8000/docs
 name: policy-guardian

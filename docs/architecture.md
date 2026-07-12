@@ -1,4 +1,4 @@
-x# Architecture — Policy Guardian AI
+x# Architecture — Sentinal
 
 ## 1. System context
 

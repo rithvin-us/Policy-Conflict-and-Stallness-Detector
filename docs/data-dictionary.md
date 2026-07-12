@@ -1,4 +1,4 @@
-# Policy Guardian AI — Data Dictionary
+# Sentinal — Data Dictionary
 
 > **Status:** FROZEN CONTRACT v1. Owned by Agent A. Agents B, C, D must not add,
 > rename, or retype fields without an explicit contract-change note in their

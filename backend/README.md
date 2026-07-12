@@ -1,4 +1,4 @@
-# Policy Guardian AI — Backend
+# Sentinal — Backend
 
 FastAPI service: connectors → ingestion → deterministic AI analysis → REST API.
 

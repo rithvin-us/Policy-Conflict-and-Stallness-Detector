@@ -1,5 +1,5 @@
 # Explainer Video Script — "From Tangled to Transformed"
-### Policy Guardian AI — animated explainer (caterpillar → butterfly metaphor)
+### Sentinal — animated explainer (caterpillar → butterfly metaphor)
 
 **Style:** flat 2D motion graphics, Kurzgesagt-style — simple geometric
 characters, a warm/dark navy background with accent-color highlights (matches
@@ -10,7 +10,7 @@ jargon in the first half.
 
 **The metaphor:** a company's policy corpus starts as a tangle of documents —
 messy, contradictory, slowly decaying, like a caterpillar that's grown sluggish
-and can't move efficiently under its own weight. Policy Guardian AI is the
+and can't move efficiently under its own weight. Sentinal is the
 chrysalis / transformation process. What emerges is lean, coordinated,
 self-monitoring — a butterfly: still the same organization, but able to see
 and correct itself continuously.
@@ -49,7 +49,7 @@ touch.
 
 ---
 
-## Scene 3 — Enter Policy Guardian AI, the chrysalis (0:40–1:00)
+## Scene 3 — Enter Sentinal, the chrysalis (0:40–1:00)
 
 **[VISUAL]** The caterpillar pauses, curls up, and a translucent chrysalis
 shape forms around it — rendered as a soft glowing outline, almost like a scan
@@ -57,7 +57,7 @@ line sweeping top to bottom. Inside, small readable glyphs flow: "must,"
 "shall," "should," little magnifying-glass icons passing over each segment.
 
 **"NARRATION":**
-> "Policy Guardian AI wraps around the whole corpus and reads it, sentence by
+> "Sentinal wraps around the whole corpus and reads it, sentence by
 > sentence — every 'must,' every 'shall,' every 'should' — pulling out exactly
 > what each rule requires, of whom, and under what conditions."
 
@@ -98,14 +98,14 @@ the real product UI). It flies smoothly, none of the earlier jittering.
 ## Scene 6 — Close / call to action (1:45–2:00)
 
 **[VISUAL]** The butterfly settles on a small shield icon with the product
-wordmark "Policy Guardian AI" beneath it. Tagline fades in underneath.
+wordmark "Sentinal" beneath it. Tagline fades in underneath.
 
 **"NARRATION":**
-> "Policy Guardian AI. Turn a tangle of policies into something that governs
+> "Sentinal. Turn a tangle of policies into something that governs
 > itself."
 
 **[ON SCREEN TEXT]**
-> Policy Guardian AI — Continuous Policy Governance & Compliance Intelligence
+> Sentinal — Continuous Policy Governance & Compliance Intelligence
 > [GitHub link] · [team/submission name]
 
 ---

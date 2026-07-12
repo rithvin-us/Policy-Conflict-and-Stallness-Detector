@@ -1,4 +1,4 @@
-"""FastAPI application factory for Policy Guardian AI.
+"""FastAPI application factory for Sentinal.
 
 Wires logging, database bootstrap, first-boot seeding, CORS, request-ID
 correlation, structured error handling, and the versioned API router.

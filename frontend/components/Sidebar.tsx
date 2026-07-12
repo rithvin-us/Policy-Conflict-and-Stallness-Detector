@@ -38,7 +38,7 @@ export function Sidebar() {
           </div>
           <div>
             <div className="text-sm font-semibold leading-none text-black font-heading tracking-tight">
-              Policy Guardian
+              Sentinal
             </div>
             <div className="mt-1 text-[0.62rem] uppercase tracking-[0.18em] text-black font-semibold">
               Governance
