@@ -100,11 +100,11 @@ export default function OverviewPage() {
                   <div className="stat-label">risk</div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm font-medium text-slate-800">{item.title}</div>
-                  <div className="truncate text-xs text-slate-500">{item.summary}</div>
+                  <div className="truncate text-sm font-medium text-black">{item.title}</div>
+                  <div className="truncate text-xs text-black">{item.summary}</div>
                 </div>
                 <SeverityChip severity={item.severity} />
-                <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">{item.kind}</span>
+                <span className="chip bg-ink-900 text-black ring-1 ring-ink-800">{item.kind}</span>
               </motion.div>
             ))}
             {queue.data && queue.data.items.length === 0 && <Empty label="No open findings" />}
@@ -117,9 +117,9 @@ export default function OverviewPage() {
             {(tl.data?.items || []).map((e) => (
               <li key={e.id} className="relative">
                 <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-accent/70 ring-2 ring-ink-900" />
-                <div className="text-sm font-medium text-slate-800">{e.title}</div>
-                {e.detail && <div className="text-xs text-slate-500">{e.detail}</div>}
-                <div className="mono mt-0.5 text-[0.68rem] text-slate-500">
+                <div className="text-sm font-medium text-black">{e.title}</div>
+                {e.detail && <div className="text-xs text-black">{e.detail}</div>}
+                <div className="mono mt-0.5 text-[0.68rem] text-black">
                   {e.kind} · {e.at ? new Date(e.at).toLocaleString() : ""}
                 </div>
               </li>
@@ -141,8 +141,8 @@ export default function OverviewPage() {
 function PageHead({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">{title}</h1>
-      <p className="mt-1 text-sm text-slate-500 font-medium">{subtitle}</p>
+      <h1 className="text-2xl font-bold font-heading text-black tracking-tight">{title}</h1>
+      <p className="mt-1 text-sm text-black font-medium">{subtitle}</p>
     </div>
   );
 }
@@ -152,7 +152,7 @@ function SubScore({ label, value, good }: { label: string; value: number; good?:
   return (
     <div>
       <div className="mb-1 flex items-center justify-between text-xs font-medium">
-        <span className="text-slate-600">{label}</span>
+        <span className="text-black">{label}</span>
         <span className="mono font-semibold" style={{ color }}>{value}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-ink-800">
@@ -193,13 +193,13 @@ function Kpi({
         <span className="stat-label">{label}</span>
         <Icon size={20} style={{ color: toneColor }} className="opacity-80" />
       </div>
-      <div className="mt-3 text-3xl font-bold font-heading tracking-tight text-slate-900">
-        {value ?? <span className="text-slate-400">—</span>}
+      <div className="mt-3 text-3xl font-bold font-heading tracking-tight text-black">
+        {value ?? <span className="text-black">—</span>}
       </div>
     </Link>
   );
 }
 
 function Empty({ label = "No data" }: { label?: string }) {
-  return <div className="py-6 text-center text-sm font-medium text-slate-500">{label}</div>;
+  return <div className="py-6 text-center text-sm font-medium text-black">{label}</div>;
 }

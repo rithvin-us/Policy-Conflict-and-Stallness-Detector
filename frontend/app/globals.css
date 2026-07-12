@@ -41,14 +41,14 @@
     @apply rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 font-mono text-[0.7rem] text-black;
   }
   .navlink {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-600 font-medium
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-black font-medium
            transition hover:bg-neutral-100 hover:text-black;
   }
   .navlink-active {
     @apply bg-blue-50 text-blue-700 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)];
   }
   .stat-label {
-    @apply text-[0.68rem] uppercase tracking-[0.14em] text-neutral-600 font-bold;
+    @apply text-[0.68rem] uppercase tracking-[0.14em] text-black font-bold;
   }
   .table-head {
     @apply sticky top-0 z-10 bg-white/95 text-[0.68rem] uppercase tracking-wider text-black font-bold backdrop-blur border-b border-neutral-200;

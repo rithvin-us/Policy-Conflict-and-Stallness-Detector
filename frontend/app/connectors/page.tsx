@@ -251,13 +251,13 @@ function AddConnector({ onDone }: { onDone: () => void }) {
           ))}
         </select>
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name"
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400" />
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
         {type === "GITHUB" ? (
           <input value={repo} onChange={(e) => setRepo(e.target.value)} placeholder="GitHub Repo URL (or owner/repo)"
-            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400" />
+            className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
         ) : <div />}
         <input value={path} onChange={(e) => setPath(e.target.value)} placeholder={type === "GITHUB" ? "Folder (e.g. policies/)" : "/abs/path"}
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400" />
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
       </div>
       {err && <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 font-bold">{err}</div>}
       <div className="mt-4 flex justify-end">

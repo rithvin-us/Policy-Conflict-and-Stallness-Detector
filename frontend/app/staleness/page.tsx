@@ -10,8 +10,8 @@ export default function StalenessPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-100">Staleness Surveillance</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-black">Staleness Surveillance</h1>
+        <p className="mt-1 text-sm text-black">
           Review-overdue policies, deprecated technology references, superseded standards, and orphaned owners.
         </p>
       </div>
@@ -22,7 +22,7 @@ export default function StalenessPage() {
               <div className="flex flex-col items-center gap-1">
                 <SeverityChip severity={s.severity} />
                 {s.age_months != null && (
-                  <span className="mono text-[0.66rem] text-slate-500">{s.age_months}mo</span>
+                  <span className="mono text-[0.66rem] text-black">{s.age_months}mo</span>
                 )}
               </div>
               <div className="min-w-0 flex-1">
@@ -32,18 +32,18 @@ export default function StalenessPage() {
                     {s.policy_id}
                   </Link>
                 </div>
-                <div className="text-sm text-slate-300">{s.evidence?.join("; ")}</div>
+                <div className="text-sm text-black">{s.evidence?.join("; ")}</div>
                 <div className="mt-1 text-sm text-severity-medium">→ {s.recommendation}</div>
               </div>
               <div className="text-right">
-                <div className="mono text-lg font-semibold text-slate-200">{Math.round(s.risk)}</div>
+                <div className="mono text-lg font-semibold text-black">{Math.round(s.risk)}</div>
                 <div className="stat-label">risk</div>
               </div>
             </div>
           </Panel>
         ))}
         {data && data.items.length === 0 && (
-          <div className="py-10 text-center text-slate-600">All policies are fresh.</div>
+          <div className="py-10 text-center text-black">All policies are fresh.</div>
         )}
       </div>
     </div>

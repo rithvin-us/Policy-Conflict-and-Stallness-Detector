@@ -20,7 +20,7 @@ export default function CompliancePage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
         <div>
           <h1 className="text-xl font-bold text-black">Compliance Mapping</h1>
-          <p className="mt-1 text-sm text-neutral-600 font-medium">
+          <p className="mt-1 text-sm text-black font-medium">
             Framework coverage across ISO 27001, NIST SP 800-53, GDPR, and COBIT 2019 — audit evidence at a glance.
           </p>
         </div>
@@ -62,7 +62,7 @@ export default function CompliancePage() {
                           {cl.covered ? "✓" : "!"}
                         </span>
                         <div className="flex-1">
-                          <span className="mono text-xs text-neutral-500 font-bold">{cl.clause}</span>
+                          <span className="mono text-xs text-black font-bold">{cl.clause}</span>
                           <span className="ml-2 text-sm text-black font-semibold">{cl.title}</span>
                         </div>
                         {cl.findings > 0 && (
@@ -74,15 +74,15 @@ export default function CompliancePage() {
                             {cl.findings} finding{cl.findings > 1 ? "s" : ""} ➔
                           </Link>
                         )}
-                        <span className="mono text-[0.66rem] text-neutral-500 font-medium bg-neutral-100 px-2 py-1 rounded-md">{cl.policies.length} policies</span>
-                        <svg className={`w-4 h-4 text-neutral-400 transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <span className="mono text-[0.66rem] text-black font-medium bg-neutral-100 px-2 py-1 rounded-md">{cl.policies.length} policies</span>
+                        <svg className={`w-4 h-4 text-black transition-transform ${isExpanded ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                         </svg>
                       </div>
                       
                       {isExpanded && (
                         <div className="px-12 py-3 bg-neutral-50 border-t border-neutral-100 text-sm">
-                          <h4 className="text-xs uppercase tracking-wider text-neutral-500 font-bold mb-2">Fulfilling Policies</h4>
+                          <h4 className="text-xs uppercase tracking-wider text-black font-bold mb-2">Fulfilling Policies</h4>
                           {cl.policies.length > 0 ? (
                             <ul className="list-disc pl-4 space-y-1">
                               {cl.policies.map(pid => (
@@ -94,7 +94,7 @@ export default function CompliancePage() {
                               ))}
                             </ul>
                           ) : (
-                            <p className="text-neutral-500 italic">No policies currently map to this clause. This represents a compliance gap.</p>
+                            <p className="text-black italic">No policies currently map to this clause. This represents a compliance gap.</p>
                           )}
                         </div>
                       )}
@@ -158,7 +158,7 @@ function SyncModal({ onClose }: { onClose: () => void }) {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-in fade-in zoom-in-95 duration-200">
         <div className="p-6 border-b border-neutral-100">
           <h2 className="text-xl font-bold text-black">Integrations & Frameworks</h2>
-          <p className="text-sm text-neutral-500 mt-1">Connect your compliance providers to auto-sync control mappings.</p>
+          <p className="text-sm text-black mt-1">Connect your compliance providers to auto-sync control mappings.</p>
         </div>
         
         <div className="p-6 space-y-4 bg-neutral-50">
@@ -169,18 +169,18 @@ function SyncModal({ onClose }: { onClose: () => void }) {
           ].map(provider => (
             <div key={provider.name} className="flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-200 shadow-sm">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center font-bold text-neutral-400 border border-neutral-200">
+                <div className="w-10 h-10 rounded-lg bg-neutral-100 flex items-center justify-center font-bold text-black border border-neutral-200">
                   {provider.icon}
                 </div>
                 <div>
                   <div className="font-bold text-sm text-black">{provider.name}</div>
-                  <div className="text-xs text-neutral-500">{provider.desc}</div>
+                  <div className="text-xs text-black">{provider.desc}</div>
                 </div>
               </div>
               <button 
                 onClick={handleSync}
                 disabled={syncing || done}
-                className="px-3 py-1.5 text-xs font-bold bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50"
+                className="px-3 py-1.5 text-xs font-bold bg-neutral-100 text-black rounded-lg hover:bg-neutral-200 transition-colors disabled:opacity-50"
               >
                 {syncing ? "Connecting..." : done ? "Connected ✓" : "Connect"}
               </button>
@@ -191,7 +191,7 @@ function SyncModal({ onClose }: { onClose: () => void }) {
         <div className="p-4 border-t border-neutral-100 flex justify-end">
           <button 
             onClick={onClose}
-            className="px-4 py-2 text-sm font-bold text-neutral-600 hover:text-black transition-colors"
+            className="px-4 py-2 text-sm font-bold text-black hover:text-black transition-colors"
           >
             Close
           </button>

@@ -39,7 +39,7 @@ export default function PoliciesPage() {
       <div className="flex items-end justify-between">
         <div>
           <h1 className="text-xl font-bold text-black">Policy Library</h1>
-          <p className="mt-1 text-sm text-neutral-600 font-medium">
+          <p className="mt-1 text-sm text-black font-medium">
             {data?.total ?? 0} policies under continuous governance. Sorted by health.
           </p>
         </div>
@@ -103,12 +103,12 @@ export default function PoliciesPage() {
                     <Link href={`/policies/${p.id}`} className="font-bold text-black hover:text-blue-600 transition-colors">
                       {p.title}
                     </Link>
-                    <div className="mono text-[0.66rem] text-neutral-500 font-semibold mt-0.5">{p.id}</div>
+                    <div className="mono text-[0.66rem] text-black font-semibold mt-0.5">{p.id}</div>
                   </td>
-                  <td className="px-3 py-3 text-neutral-700 font-medium">{p.owner || "—"}</td>
-                  <td className="px-3 py-3 mono text-neutral-600 font-medium">v{p.version}</td>
-                  <td className="px-3 py-3 text-neutral-600 font-medium">{p.last_reviewed?.slice(0, 10) || "—"}</td>
-                  <td className="px-3 py-3 text-right mono text-neutral-700 font-bold">{p.obligation_count}</td>
+                  <td className="px-3 py-3 text-black font-medium">{p.owner || "—"}</td>
+                  <td className="px-3 py-3 mono text-black font-medium">v{p.version}</td>
+                  <td className="px-3 py-3 text-black font-medium">{p.last_reviewed?.slice(0, 10) || "—"}</td>
+                  <td className="px-3 py-3 text-right mono text-black font-bold">{p.obligation_count}</td>
                   <td className="px-3 py-3">
                     <div className="flex items-center gap-2">
                       <div className="h-1.5 w-24 overflow-hidden rounded-full bg-neutral-200">
@@ -121,7 +121,7 @@ export default function PoliciesPage() {
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-neutral-500 font-medium">
+                  <td colSpan={6} className="px-3 py-8 text-center text-black font-medium">
                     No policies match your filters.
                   </td>
                 </tr>
@@ -183,9 +183,9 @@ function UploadForm({ onDone }: { onDone: () => void }) {
     <Panel title="Upload a policy document">
       <div className="grid gap-3 md:grid-cols-2 mb-4">
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Policy Title"
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400" />
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
         <input value={owner} onChange={(e) => setOwner(e.target.value)} placeholder="Owner / Team"
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400" />
+          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
       </div>
       
       <div className="mt-2 w-full rounded-xl border-2 border-dashed border-neutral-300 bg-neutral-50 p-6 flex flex-col items-center justify-center relative hover:bg-neutral-100 transition-colors cursor-pointer">
@@ -195,13 +195,13 @@ function UploadForm({ onDone }: { onDone: () => void }) {
           onChange={handleFileUpload}
           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" 
         />
-        <svg className="w-8 h-8 text-neutral-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <svg className="w-8 h-8 text-black mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
         </svg>
         <span className="text-sm font-bold text-black">
           {fileName ? `Selected: ${fileName}` : "Click to select a file"}
         </span>
-        <span className="text-xs text-neutral-500 font-medium mt-1">
+        <span className="text-xs text-black font-medium mt-1">
           Supported formats: .md, .txt, .pdf
         </span>
       </div>

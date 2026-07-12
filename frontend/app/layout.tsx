@@ -35,8 +35,8 @@ export default function RootLayout({
 function TopBar() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-ink-900/40 px-6">
-      <div className="flex items-center gap-2 text-xs text-slate-500">
-        <span className="mono text-slate-400">policy-guardian</span>
+      <div className="flex items-center gap-2 text-xs text-black">
+        <span className="mono text-black">policy-guardian</span>
         <span>/</span>
         <span>governance operations console</span>
       </div>

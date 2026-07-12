@@ -20,8 +20,8 @@ const STATUS_STYLES: Record<string, string> = {
   CONNECTED: "bg-severity-ok/15 text-severity-ok ring-severity-ok/30",
   SYNCING: "bg-severity-medium/15 text-severity-medium ring-severity-medium/30",
   ERROR: "bg-severity-high/15 text-severity-high ring-severity-high/30",
-  DISCONNECTED: "bg-slate-500/15 text-slate-400 ring-slate-500/30",
-  NOT_CONFIGURED: "bg-slate-600/15 text-slate-500 ring-slate-600/30",
+  DISCONNECTED: "bg-slate-500/15 text-black ring-slate-500/30",
+  NOT_CONFIGURED: "bg-slate-600/15 text-black ring-slate-600/30",
 };
 
 export function StatusPill({ status }: { status: string }) {
@@ -34,7 +34,7 @@ export function StatusPill({ status }: { status: string }) {
 
 export function TypeTag({ label }: { label: string }) {
   return (
-    <span className="chip bg-white/5 text-slate-300 ring-1 ring-white/10">
+    <span className="chip bg-white/5 text-black ring-1 ring-white/10">
       {label.replace(/_/g, " ")}
     </span>
   );
@@ -55,7 +55,7 @@ export function Panel({
     <section className={`panel ${className}`}>
       {title && (
         <header className="flex items-center justify-between border-b border-white/5 px-5 py-3">
-          <h2 className="text-sm font-semibold text-slate-200">{title}</h2>
+          <h2 className="text-sm font-semibold text-black">{title}</h2>
           {action}
         </header>
       )}

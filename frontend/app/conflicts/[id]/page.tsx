@@ -13,8 +13,8 @@ export default function ConflictDetailPage({ params }: { params: { id: string } 
       <Link href="/conflicts" className="text-sm text-accent hover:underline">
         ← Back to conflicts
       </Link>
-      <h1 className="text-xl font-semibold text-slate-100">Conflict Comparison</h1>
-      {loading && <div className="text-sm text-slate-500">Loading…</div>}
+      <h1 className="text-xl font-semibold text-black">Conflict Comparison</h1>
+      {loading && <div className="text-sm text-black">Loading…</div>}
       {error && <div className="text-sm text-severity-high">Failed to load: {error}</div>}
       {data && <ConflictCompare conflict={data} />}
     </div>

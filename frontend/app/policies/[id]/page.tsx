@@ -9,7 +9,7 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
   const { data, error, loading } = useApi(() => api.policy(params.id), [params.id]);
   const blast = useApi(() => api.blastRadius(params.id), [params.id]);
 
-  if (loading) return <div className="text-sm text-slate-500">Loading…</div>;
+  if (loading) return <div className="text-sm text-black">Loading…</div>;
   if (error || !data) return <div className="text-sm text-severity-high">Failed to load policy.</div>;
 
   return (
@@ -21,8 +21,8 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-slate-100">{data.title}</h1>
-          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-slate-500">
+          <h1 className="text-xl font-semibold text-black">{data.title}</h1>
+          <div className="mt-1 flex flex-wrap items-center gap-2 text-sm text-black">
             <span className="mono">{data.id}</span>
             <span>·</span><span>{data.owner}</span>
             <span>·</span><span>v{data.version}</span>
@@ -50,12 +50,12 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
                   <span className="mono text-xs text-accent-soft">
                     {o.polarity === "NEGATE" ? "¬" : ""}{o.action}
                   </span>
-                  <span className="mono text-[0.66rem] text-slate-500">{o.strength}</span>
+                  <span className="mono text-[0.66rem] text-black">{o.strength}</span>
                   {o.section && <span className="kbd ml-auto">§{o.section}</span>}
                 </div>
-                <p className="text-sm text-slate-300">{o.evidence_text}</p>
+                <p className="text-sm text-black">{o.evidence_text}</p>
                 {Object.keys(o.parameters || {}).length > 0 && (
-                  <div className="mono mt-1 text-[0.66rem] text-slate-600">
+                  <div className="mono mt-1 text-[0.66rem] text-black">
                     {JSON.stringify(o.parameters)}
                   </div>
                 )}
@@ -72,11 +72,11 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
                   className="flex items-center gap-2 rounded-lg border border-white/5 bg-ink-850/50 p-2.5 hover:bg-white/[0.03]">
                   <SeverityChip severity={c.severity} />
                   <TypeTag label={c.conflict_type} />
-                  <span className="truncate text-xs text-slate-400">{c.explanation}</span>
+                  <span className="truncate text-xs text-black">{c.explanation}</span>
                 </Link>
               ))}
               {(!data.conflicts || data.conflicts.length === 0) && (
-                <div className="py-4 text-center text-sm text-slate-600">No conflicts</div>
+                <div className="py-4 text-center text-sm text-black">No conflicts</div>
               )}
             </div>
           </Panel>
@@ -89,12 +89,12 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
                     <SeverityChip severity={s.severity} />
                     <TypeTag label={s.stale_reason} />
                   </div>
-                  <div className="text-xs text-slate-400">{s.evidence?.join("; ")}</div>
+                  <div className="text-xs text-black">{s.evidence?.join("; ")}</div>
                   <div className="mt-1 text-xs text-severity-medium">{s.recommendation}</div>
                 </div>
               ))}
               {(!data.staleness || data.staleness.length === 0) && (
-                <div className="py-4 text-center text-sm text-slate-600">Fresh</div>
+                <div className="py-4 text-center text-sm text-black">Fresh</div>
               )}
             </div>
           </Panel>
@@ -103,11 +103,11 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
             <Panel title="Blast Radius">
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Potential Findings Introduced:</span>
+                  <span className="text-black">Potential Findings Introduced:</span>
                   <span className="mono">{blast.data.potential_new_findings}</span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-slate-400">Est. Governance Impact:</span>
+                  <span className="text-black">Est. Governance Impact:</span>
                   <span className="mono" style={{ color: scoreColor(100 + blast.data.estimated_governance_impact * 5) }}>
                     {blast.data.estimated_governance_impact}
                   </span>

@@ -20,8 +20,8 @@ export default function GovernancePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-xl font-semibold text-slate-100">Continuous Governance</h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <h1 className="text-xl font-semibold text-black">Continuous Governance</h1>
+        <p className="mt-1 text-sm text-black">
           Live GitHub monitoring. Every policy change is verified, re-analyzed by the
           existing engine, and written to an immutable audit trail — no manual upload.
         </p>
@@ -59,7 +59,7 @@ function RepoHealth({ status, error }: { status: any; error: string | null }) {
     <Panel
       title="Repository Health"
       action={
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-black">
           Signature verification{" "}
           <span className={status?.signature_verification ? "text-severity-ok" : "text-severity-medium"}>
             {status?.signature_verification ? "ON" : "OFF (dev)"}
@@ -68,11 +68,11 @@ function RepoHealth({ status, error }: { status: any; error: string | null }) {
       }
     >
       {repos.length === 0 ? (
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-black">
           No GitHub connector configured. Add one on{" "}
           <a href="/connectors" className="text-accent-soft underline">Sources &amp; Webhooks</a>,
           then point a webhook at{" "}
-          <code className="mono text-slate-300">{status?.webhook_url || "/api/v1/webhooks/github"}</code>.
+          <code className="mono text-black">{status?.webhook_url || "/api/v1/webhooks/github"}</code>.
         </div>
       ) : (
         <div className="grid gap-3 md:grid-cols-2">
@@ -80,8 +80,8 @@ function RepoHealth({ status, error }: { status: any; error: string | null }) {
             <div key={r.connector_id} className="rounded-lg border border-white/5 bg-ink-850/50 p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-sm font-medium text-slate-200">{r.repo || r.name}</div>
-                  <div className="mono text-[0.66rem] text-slate-500">
+                  <div className="text-sm font-medium text-black">{r.repo || r.name}</div>
+                  <div className="mono text-[0.66rem] text-black">
                     {r.branch}{r.path ? ` · ${r.path}/` : ""}
                   </div>
                 </div>
@@ -95,13 +95,13 @@ function RepoHealth({ status, error }: { status: any; error: string | null }) {
               </div>
               {r.latest_commit && (
                 <div className="mt-3 rounded-md border border-white/5 bg-black/20 p-2 text-xs">
-                  <div className="text-slate-400">Latest commit</div>
+                  <div className="text-black">Latest commit</div>
                   <a href={r.latest_commit.url} target="_blank" rel="noreferrer"
                      className="mono text-accent-soft">
                     {r.latest_commit.sha.slice(0, 7)}
                   </a>{" "}
-                  <span className="text-slate-300">{r.latest_commit.message}</span>
-                  <div className="text-slate-500">
+                  <span className="text-black">{r.latest_commit.message}</span>
+                  <div className="text-black">
                     {r.latest_commit.author}
                     {r.latest_commit.date ? ` · ${new Date(r.latest_commit.date).toLocaleString()}` : ""}
                   </div>
@@ -119,8 +119,8 @@ function RepoHealth({ status, error }: { status: any; error: string | null }) {
 function Stat({ label, value }: { label: string; value: string }) {
   return (
     <div>
-      <div className="text-[0.62rem] uppercase tracking-wide text-slate-500">{label}</div>
-      <div className="text-slate-300">{value}</div>
+      <div className="text-[0.62rem] uppercase tracking-wide text-black">{label}</div>
+      <div className="text-black">{value}</div>
     </div>
   );
 }
@@ -170,7 +170,7 @@ function LiveFeed({ items }: { items: FeedItem[] }) {
       </span>}
     >
       {items.length === 0 ? (
-        <div className="text-sm text-slate-500">
+        <div className="text-sm text-black">
           Waiting for events. Push a change to a monitored policy and it appears here in real time.
         </div>
       ) : (
@@ -178,12 +178,12 @@ function LiveFeed({ items }: { items: FeedItem[] }) {
           {items.map((it, i) => (
             <li key={i} className="rounded-md border border-white/5 bg-ink-850/50 p-2 text-xs">
               <div className="flex items-center justify-between">
-                <span className="font-medium text-slate-300">{FEED_LABEL[it.type] || it.type}</span>
-                <span className="mono text-[0.6rem] text-slate-500">
+                <span className="font-medium text-black">{FEED_LABEL[it.type] || it.type}</span>
+                <span className="mono text-[0.6rem] text-black">
                   {new Date(it.at).toLocaleTimeString()}
                 </span>
               </div>
-              <div className="mt-1 text-slate-500">{summarize(it)}</div>
+              <div className="mt-1 text-black">{summarize(it)}</div>
             </li>
           ))}
         </ol>
@@ -226,7 +226,7 @@ function AuditTrail({
           value={query}
           onChange={(e) => onQuery(e.target.value)}
           placeholder="Search file, commit, author…"
-          className="rounded-lg border border-white/10 bg-ink-850 px-3 py-1.5 text-xs text-slate-200 focus:border-accent focus:outline-none"
+          className="rounded-lg border border-white/10 bg-ink-850 px-3 py-1.5 text-xs text-black focus:border-accent focus:outline-none"
         />
       }
     >
@@ -247,10 +247,10 @@ function AuditTrail({
           <tbody>
             {rows.map((a) => (
               <tr key={a.id} className="border-t border-white/5 align-top">
-                <td className="px-3 py-2 text-xs text-slate-500">{new Date(a.created_at).toLocaleString()}</td>
+                <td className="px-3 py-2 text-xs text-black">{new Date(a.created_at).toLocaleString()}</td>
                 <td className="px-3 py-2">
-                  <div className="mono text-xs text-slate-300">{a.policy_file}</div>
-                  {a.repo && <div className="mono text-[0.6rem] text-slate-600">{a.repo}@{a.branch}</div>}
+                  <div className="mono text-xs text-black">{a.policy_file}</div>
+                  {a.repo && <div className="mono text-[0.6rem] text-black">{a.repo}@{a.branch}</div>}
                 </td>
                 <td className="px-3 py-2"><TypeTag label={a.change_type} /></td>
                 <td className="px-3 py-2 text-xs">
@@ -259,11 +259,11 @@ function AuditTrail({
                       {(a.commit_sha || "").slice(0, 7)}
                     </a>
                   ) : (
-                    <span className="mono text-slate-500">{(a.commit_sha || "").slice(0, 7) || "—"}</span>
+                    <span className="mono text-black">{(a.commit_sha || "").slice(0, 7) || "—"}</span>
                   )}
-                  {a.pr_number ? <div className="text-[0.6rem] text-slate-500">PR #{a.pr_number}</div> : null}
+                  {a.pr_number ? <div className="text-[0.6rem] text-black">PR #{a.pr_number}</div> : null}
                 </td>
-                <td className="px-3 py-2 text-xs text-slate-400">{a.author || "—"}</td>
+                <td className="px-3 py-2 text-xs text-black">{a.author || "—"}</td>
                 <td className="px-3 py-2">
                   <div className="flex flex-wrap gap-1">
                     {statusChip(a.conflict_status)}
@@ -276,17 +276,17 @@ function AuditTrail({
                       )}
                   </div>
                   {a.compliance_impact.length > 0 && (
-                    <div className="mt-1 mono text-[0.6rem] text-slate-500">
+                    <div className="mt-1 mono text-[0.6rem] text-black">
                       {a.compliance_impact.slice(0, 3).join(", ")}
                     </div>
                   )}
                 </td>
-                <td className="px-3 py-2 mono text-xs text-slate-300">{a.risk_score.toFixed(2)}</td>
+                <td className="px-3 py-2 mono text-xs text-black">{a.risk_score.toFixed(2)}</td>
                 <td className="px-3 py-2">
                   <select
                     value={a.reviewer_status}
                     onChange={(e) => onReview(a.id, { reviewer_status: e.target.value })}
-                    className="rounded border border-white/10 bg-ink-850 px-1.5 py-1 text-[0.65rem] text-slate-300"
+                    className="rounded border border-white/10 bg-ink-850 px-1.5 py-1 text-[0.65rem] text-black"
                   >
                     {["PENDING", "ACKNOWLEDGED", "REVIEWED", "DISMISSED"].map((s) => (
                       <option key={s} value={s}>{s}</option>
@@ -297,7 +297,7 @@ function AuditTrail({
             ))}
             {rows.length === 0 && (
               <tr>
-                <td colSpan={8} className="py-6 text-center text-slate-600">
+                <td colSpan={8} className="py-6 text-center text-black">
                   No audit events yet. Changes pushed to a monitored repo appear here.
                 </td>
               </tr>
@@ -305,7 +305,7 @@ function AuditTrail({
           </tbody>
         </table>
       </div>
-      <div className="mt-2 text-right text-[0.65rem] text-slate-600">{total} record(s)</div>
+      <div className="mt-2 text-right text-[0.65rem] text-black">{total} record(s)</div>
     </Panel>
   );
 }

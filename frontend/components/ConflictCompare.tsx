@@ -43,13 +43,13 @@ function PolicySide({
   return (
     <div className="flex-1 rounded-lg border border-ink-800 bg-ink-950 p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-bold text-slate-900">{title || policyId}</span>
+        <span className="text-sm font-bold text-black">{title || policyId}</span>
         {section && <span className="kbd">§{section}</span>}
       </div>
-      <p className="text-sm leading-relaxed text-slate-700">
+      <p className="text-sm leading-relaxed text-black">
         <Highlighted quote={quote} spans={spans} />
       </p>
-      <div className="mono mt-3 text-[0.66rem] text-slate-500">{policyId}</div>
+      <div className="mono mt-3 text-[0.66rem] text-black">{policyId}</div>
     </div>
   );
 }
@@ -91,10 +91,10 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
       <div className="flex flex-wrap items-center gap-2">
         <SeverityChip severity={conflict.severity} />
         <TypeTag label={conflict.conflict_type} />
-        <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">
+        <span className="chip bg-ink-900 text-black ring-1 ring-ink-800">
           confidence {Math.round(conflict.confidence * 100)}%
         </span>
-        <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">
+        <span className="chip bg-ink-900 text-black ring-1 ring-ink-800">
           risk {Math.round(conflict.risk)}
         </span>
       </div>
@@ -132,7 +132,7 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
       </div>
 
       <Panel title="Analysis Details">
-        <p className="text-sm leading-relaxed text-slate-700 font-medium">
+        <p className="text-sm leading-relaxed text-black font-medium">
           {ep?.why_flagged || conflict.explanation}
         </p>
         {conflict.scope_analysis && (
@@ -158,7 +158,7 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
                 {aiSuggestion}
               </div>
             ) : (
-              <p className="text-sm text-slate-700 font-medium">{conflict.resolution_suggestion}</p>
+              <p className="text-sm text-black font-medium">{conflict.resolution_suggestion}</p>
             )}
           </div>
           <div>
@@ -187,7 +187,7 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
         {ep?.confidence_factors?.length ? (
           <div className="mt-4">
             <div className="stat-label mb-1">Confidence Breakdown</div>
-            <ul className="text-sm text-slate-700 space-y-1.5 font-medium">
+            <ul className="text-sm text-black space-y-1.5 font-medium">
               {ep.confidence_factors.map((factor) => (
                 <li key={factor} className="flex items-center gap-2">
                   <CheckCircle2 size={16} className="text-severity-low" /> {factor}

@@ -37,10 +37,10 @@ export function Sidebar() {
             <Hexagon size={18} />
           </div>
           <div>
-            <div className="text-sm font-semibold leading-none text-slate-900 font-heading tracking-tight">
+            <div className="text-sm font-semibold leading-none text-black font-heading tracking-tight">
               Policy Guardian
             </div>
-            <div className="mt-1 text-[0.62rem] uppercase tracking-[0.18em] text-slate-500 font-semibold">
+            <div className="mt-1 text-[0.62rem] uppercase tracking-[0.18em] text-black font-semibold">
               Governance
             </div>
           </div>
@@ -58,7 +58,7 @@ export function Sidebar() {
               href={item.href}
               className={`navlink ${active ? "navlink-active" : ""}`}
             >
-              <Icon size={16} className={active ? "text-accent" : "text-slate-400"} />
+              <Icon size={16} className={active ? "text-accent" : "text-black"} />
               {item.label}
             </Link>
           );
@@ -71,7 +71,7 @@ export function Sidebar() {
             document.cookie = "demo_auth=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
             window.location.href = "/login";
           }}
-          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-500 hover:bg-slate-50 hover:text-slate-900 transition-colors"
+          className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-black hover:bg-slate-50 hover:text-black transition-colors"
         >
           <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -80,8 +80,8 @@ export function Sidebar() {
         </button>
       </div>
 
-      <div className="mt-auto rounded-lg border border-ink-800 bg-ink-900/70 p-3 text-[0.7rem] text-slate-500 shadow-sm">
-        <div className="mb-1 font-medium text-slate-700">Deterministic Engine</div>
+      <div className="mt-auto rounded-lg border border-ink-800 bg-ink-900/70 p-3 text-[0.7rem] text-black shadow-sm">
+        <div className="mb-1 font-medium text-black">Deterministic Engine</div>
         Findings are reproducible and cite exact source text.
       </div>
     </aside>
