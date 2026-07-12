@@ -111,7 +111,7 @@ def create_bulk_github_connectors(body: BulkGitHubConnectorRequest,
         cfg = {
             "repo": repo_info.repo,
             "branch": repo_info.branch,
-            "path": repo_info.path
+            "paths": repo_info.paths
         }
         connector = Connector(
             id=new_id("con"), type="GITHUB", 

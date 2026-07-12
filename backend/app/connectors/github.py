@@ -41,8 +41,13 @@ class GitHubConnector(BaseConnector):
     def _branch(self) -> str:
         return self.config.get("branch", "main")
 
-    def _path(self) -> str:
-        return self.config.get("path", "").strip("/")
+    def _paths(self) -> list[str]:
+        # Support legacy "path" string, or new "paths" list
+        paths = self.config.get("paths")
+        if not paths:
+            single = self.config.get("path", "").strip("/")
+            paths = [single] if single else []
+        return [p.strip("/") for p in paths if p.strip("/")]
 
     def supports_webhooks(self) -> bool:
         return True
@@ -58,24 +63,34 @@ class GitHubConnector(BaseConnector):
             return ERROR
 
     def list_policies(self) -> list[dict[str, str]]:
-        repo, path = self._repo(), self._path()
+        repo = self._repo()
         if not repo:
             return []
-        url = f"{_API}/repos/{repo}/contents/{path}".rstrip("/")
-        try:
-            r = httpx.get(url, headers=self._headers(),
-                          params={"ref": self._branch()}, timeout=15)
-            r.raise_for_status()
-            items = r.json()
-        except (httpx.HTTPError, ValueError):
-            return []
-        if isinstance(items, dict):  # single file returned
-            items = [items]
-        return [
-            {"path": it["path"], "name": it["name"].rsplit(".", 1)[0]}
-            for it in items
-            if it.get("type") == "file" and it["name"].lower().endswith(_EXTS)
-        ]
+        
+        all_items = []
+        # If no paths specified, we fetch root.
+        paths_to_fetch = self._paths() or [""]
+        
+        for path in paths_to_fetch:
+            url = f"{_API}/repos/{repo}/contents/{path}".rstrip("/")
+            try:
+                r = httpx.get(url, headers=self._headers(),
+                              params={"ref": self._branch()}, timeout=15)
+                r.raise_for_status()
+                items = r.json()
+            except (httpx.HTTPError, ValueError):
+                continue
+            
+            if isinstance(items, dict):  # single file returned
+                items = [items]
+            
+            all_items.extend([
+                {"path": it["path"], "name": it["name"].rsplit(".", 1)[0]}
+                for it in items
+                if it.get("type") == "file" and it["name"].lower().endswith(_EXTS)
+            ])
+            
+        return all_items
 
     def fetch(self, ref: dict[str, str]) -> RawPolicy:
         repo = self._repo()
@@ -110,11 +125,18 @@ class GitHubConnector(BaseConnector):
                                "last_modified": last_modified})
 
     def is_policy_path(self, path: str) -> bool:
-        """True when ``path`` is a policy file inside the connector's tree."""
-        base = self._path()
-        if base and not (path == base or path.startswith(base + "/")):
+        """True when ``path`` is a policy file inside one of the connector's trees."""
+        if not path.lower().endswith(_EXTS):
             return False
-        return path.lower().endswith(_EXTS)
+            
+        bases = self._paths()
+        if not bases:
+            return True
+            
+        for base in bases:
+            if path == base or path.startswith(base + "/"):
+                return True
+        return False
 
     def latest_commit(self) -> dict[str, str] | None:
         """Return ``{sha, url, message, author, date}`` for HEAD of the branch.

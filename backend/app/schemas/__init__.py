@@ -40,7 +40,7 @@ class WebhookRegisterRequest(BaseModel):
 class BulkGitHubRepo(BaseModel):
     repo: str
     branch: str = "main"
-    path: str = "policies/"
+    paths: list[str] = Field(default_factory=lambda: ["policies/"])
 
 
 class BulkGitHubConnectorRequest(BaseModel):

@@ -17,6 +17,7 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
   const [loadingOrgs, setLoadingOrgs] = useState(true);
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [selectedRepoIds, setSelectedRepoIds] = useState<Set<number>>(new Set());
+  const [repoPaths, setRepoPaths] = useState<Record<number, string>>({});
   const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -44,16 +45,29 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
 
   const toggleRepo = (id: number) => {
     const next = new Set(selectedRepoIds);
-    if (next.has(id)) next.delete(id);
-    else next.add(id);
+    if (next.has(id)) {
+      next.delete(id);
+      setRepoPaths(prev => {
+        const nextPaths = { ...prev };
+        delete nextPaths[id];
+        return nextPaths;
+      });
+    } else {
+      next.add(id);
+      setRepoPaths(prev => ({ ...prev, [id]: "policies/" }));
+    }
     setSelectedRepoIds(next);
   };
 
   const toggleAll = () => {
     if (selectedRepoIds.size === filteredRepos.length) {
       setSelectedRepoIds(new Set());
+      setRepoPaths({});
     } else {
       setSelectedRepoIds(new Set(filteredRepos.map(r => r.id)));
+      const newPaths: Record<number, string> = {};
+      filteredRepos.forEach(r => newPaths[r.id] = "policies/");
+      setRepoPaths(newPaths);
     }
   };
 
@@ -66,7 +80,10 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
     const payload = selected.map(r => ({
       repo: r.full_name,
       branch: r.default_branch || "main",
-      path: "policies/" // Default assumption for the hackathon UX
+      paths: (repoPaths[r.id] !== undefined ? repoPaths[r.id] : "policies/")
+        .split(",")
+        .map(p => p.trim())
+        .filter(Boolean)
     }));
 
     try {
@@ -134,37 +151,51 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
                 {filteredRepos.map(repo => (
                   <li 
                     key={repo.id} 
-                    className={`flex items-center px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors ${selectedRepoIds.has(repo.id) ? "bg-blue-50" : ""}`}
-                    onClick={() => toggleRepo(repo.id)}
+                    className={`flex flex-col px-4 py-3 hover:bg-blue-50 transition-colors ${selectedRepoIds.has(repo.id) ? "bg-blue-50" : ""}`}
                   >
-                    <input 
-                      type="checkbox" 
-                      className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500 mr-3"
-                      checked={selectedRepoIds.has(repo.id)}
-                      readOnly
-                    />
-                    <img 
-                      src={repo.owner.avatar_url} 
-                      alt={repo.owner.login} 
-                      className="w-8 h-8 rounded border border-neutral-200 mr-3"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm text-black truncate">{repo.name}</span>
-                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-neutral-200 bg-white text-black uppercase">
-                          {repo.private ? "Private" : "Public"}
-                        </span>
+                    <div className="flex items-center cursor-pointer" onClick={() => toggleRepo(repo.id)}>
+                      <input 
+                        type="checkbox" 
+                        className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500 mr-3"
+                        checked={selectedRepoIds.has(repo.id)}
+                        readOnly
+                      />
+                      <img 
+                        src={repo.owner.avatar_url} 
+                        alt={repo.owner.login} 
+                        className="w-8 h-8 rounded border border-neutral-200 mr-3"
+                      />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="font-bold text-sm text-black truncate">{repo.name}</span>
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-neutral-200 bg-white text-black uppercase">
+                            {repo.private ? "Private" : "Public"}
+                          </span>
+                        </div>
+                        <div className="text-xs text-black font-medium mt-0.5 truncate">
+                          {repo.description || "No description provided."}
+                        </div>
                       </div>
-                      <div className="text-xs text-black font-medium mt-0.5 truncate">
-                        {repo.description || "No description provided."}
+                      <div className="text-xs text-black text-right min-w-[100px]">
+                        <div className="font-semibold">{repo.default_branch}</div>
+                        <div className="font-medium text-[10px] uppercase mt-0.5">
+                          {new Date(repo.updated_at).toLocaleDateString()}
+                        </div>
                       </div>
                     </div>
-                    <div className="text-xs text-black text-right min-w-[100px]">
-                      <div className="font-semibold">{repo.default_branch}</div>
-                      <div className="font-medium text-[10px] uppercase mt-0.5">
-                        {new Date(repo.updated_at).toLocaleDateString()}
+                    {selectedRepoIds.has(repo.id) && (
+                      <div className="mt-3 pl-14">
+                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Policy Folders (comma separated)</label>
+                        <input
+                          type="text"
+                          value={repoPaths[repo.id] !== undefined ? repoPaths[repo.id] : "policies/"}
+                          onChange={(e) => setRepoPaths(prev => ({ ...prev, [repo.id]: e.target.value }))}
+                          className="w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-black focus:border-blue-500 focus:outline-none shadow-sm"
+                          placeholder="policies/, docs/compliance/"
+                          onClick={(e) => e.stopPropagation()}
+                        />
                       </div>
-                    </div>
+                    )}
                   </li>
                 ))}
               </ul>
