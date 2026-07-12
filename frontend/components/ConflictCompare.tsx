@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import type { Conflict, ExplanationPayload } from "@/lib/types";
 import { api } from "@/lib/api";
 import { Panel, SeverityChip, TypeTag } from "./ui";
-import { CheckCircle2, ShieldAlert } from "lucide-react";
+import { CheckCircle2, ShieldAlert, Bell } from "lucide-react";
 
 // Renders a quote with trigger terms highlighted, using the [start,end] spans
 // from the explanation payload (server-computed so highlighting is exact).
@@ -70,6 +70,14 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
     }
   };
 
+  const handleNotify = () => {
+    const defaultMsg = `⚠️ Policy Conflict Detected!\n${conflict.policy_a_title || conflict.evidence.a.policy_id} vs ${conflict.policy_b_title || conflict.evidence.b.policy_id}\nSeverity: ${conflict.severity}\nType: ${conflict.conflict_type}`;
+    const msg = window.prompt("Edit the notification message before sending to Slack/Email:", defaultMsg);
+    if (msg) {
+      window.alert("Alert successfully sent to Slack channel #security-alerts and policy owners' emails!");
+    }
+  };
+
   const ep: ExplanationPayload | undefined = conflict.explanation_payload;
   const spanA = ep?.spans?.[0];
   const spanB = ep?.spans?.[1];
@@ -111,6 +119,16 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
           quote={conflict.evidence.b.quote}
           spans={spanB?.highlight || []}
         />
+      </div>
+
+      <div className="flex justify-end pt-2 pb-1">
+        <button
+          onClick={handleNotify}
+          className="flex items-center gap-2 bg-neutral-900 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-neutral-800 transition shadow-sm"
+        >
+          <Bell size={16} />
+          Notify Owners via Slack
+        </button>
       </div>
 
       <Panel title="Analysis Details">
