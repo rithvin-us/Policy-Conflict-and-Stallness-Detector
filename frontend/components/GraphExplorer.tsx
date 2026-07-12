@@ -92,24 +92,26 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
 
   const edges: Edge[] = useMemo(
     () =>
-      payload.edges.map((e) => {
-        const rel = e.data?.relation || "RELATED";
-        const color =
-          rel === "CONFLICT" && e.data?.severity
-            ? severityColor(e.data.severity)
-            : RELATION_COLOR[rel] || "#94a3b8";
-        return {
-          id: e.id,
-          source: e.source,
-          target: e.target,
-          type: "smoothstep",
-          label: rel === "RELATED" ? undefined : e.label,
-          animated: rel === "CONFLICT" && e.data?.severity === "HIGH",
-          style: { stroke: color, strokeWidth: rel === "RELATED" ? 1 : 2 },
-          labelStyle: { fill: color, fontSize: 10, fontWeight: "bold" },
-          labelBgStyle: { fill: "#ffffff" },
-        };
-      }),
+      payload.edges
+        .filter((e) => e.data?.relation !== "RELATED") // Remove unnecessary clutter lines
+        .map((e) => {
+          const rel = e.data?.relation || "RELATED";
+          const color =
+            rel === "CONFLICT" && e.data?.severity
+              ? severityColor(e.data.severity)
+              : RELATION_COLOR[rel] || "#94a3b8";
+          return {
+            id: e.id,
+            source: e.source,
+            target: e.target,
+            type: "default", // Curved lines for better understanding
+            label: rel === "RELATED" ? undefined : e.label,
+            animated: rel === "CONFLICT" && e.data?.severity === "HIGH",
+            style: { stroke: color, strokeWidth: 2 },
+            labelStyle: { fill: color, fontSize: 10, fontWeight: "bold" },
+            labelBgStyle: { fill: "#ffffff" },
+          };
+        }),
     [payload],
   );
 
