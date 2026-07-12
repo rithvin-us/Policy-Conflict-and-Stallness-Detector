@@ -38,6 +38,9 @@ async function req<T>(path: string, init?: RequestInit): Promise<T> {
     const text = await res.text().catch(() => "");
     throw new Error(`${res.status} ${path}: ${text.slice(0, 200)}`);
   }
+  if (res.status === 204) {
+    return {} as T;
+  }
   return res.json() as Promise<T>;
 }
 
@@ -79,10 +82,10 @@ export const api = {
   syncConnector: (id: string) =>
     req<Record<string, unknown>>(`/connectors/${id}/sync`, { method: "POST" }),
   webhookEvents: () => req<List<WebhookEvent>>("/webhooks/events"),
-  registerWebhook: (connector_id: string, event_types: string[] = ["push", "pull_request"]) =>
+  registerWebhook: (connector_id: string, event_types: string[] = ["push", "pull_request"], github_token?: string) =>
     req<Record<string, unknown>>("/webhooks/register", {
       method: "POST",
-      body: JSON.stringify({ connector_id, event_types }),
+      body: JSON.stringify({ connector_id, event_types, github_token }),
     }),
 
   // Continuous governance / GitHub integration.

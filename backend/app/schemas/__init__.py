@@ -34,6 +34,7 @@ class ConnectorCreateRequest(BaseModel):
 class WebhookRegisterRequest(BaseModel):
     connector_id: str
     event_types: list[str] = Field(default_factory=lambda: ["push"])
+    github_token: Optional[str] = None
 
 
 class AnalysisRunRequest(BaseModel):

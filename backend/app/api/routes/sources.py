@@ -102,6 +102,7 @@ def connector_health(connector_id: str, db: Session = Depends(get_db)) -> dict:
 
 @router.post("/webhooks/register")
 def register_webhook(body: WebhookRegisterRequest,
+                     request: Request,
                      db: Session = Depends(get_db)) -> dict:
     connector = db.get(Connector, body.connector_id)
     if not connector:
@@ -112,8 +113,42 @@ def register_webhook(body: WebhookRegisterRequest,
     cfg["webhook_events"] = body.event_types
     connector.config = cfg
     db.commit()
+    
+    # Determine webhook URL
+    base_url = str(request.base_url).rstrip("/")
+    api_url = settings.API_URL if hasattr(settings, "API_URL") and settings.API_URL else base_url
+    webhook_url = f"{api_url}/api/v1/webhooks/{connector.type.lower()}"
+    
+    if body.github_token and connector.type == "GITHUB":
+        repo = cfg.get("repo")
+        if not repo:
+            raise HTTPException(400, "Connector is missing a repository path")
+            
+        import httpx
+        gh_url = f"https://api.github.com/repos/{repo}/hooks"
+        headers = {
+            "Authorization": f"Bearer {body.github_token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+        gh_payload = {
+            "name": "web",
+            "active": True,
+            "events": body.event_types,
+            "config": {
+                "url": webhook_url,
+                "content_type": "json",
+                "secret": settings.GITHUB_WEBHOOK_SECRET
+            }
+        }
+        
+        response = httpx.post(gh_url, headers=headers, json=gh_payload)
+        if response.status_code not in (200, 201):
+            log.error("Failed to create webhook on GitHub", extra={"extra_fields": {"response": response.text}})
+            raise HTTPException(400, f"Failed to create webhook on GitHub: {response.text}")
+
     return {"id": new_id("whk"), "secret_ref": secret_ref,
-            "url": f"/api/v1/webhooks/{connector.type.lower()}",
+            "url": webhook_url,
             "event_types": body.event_types}
 
 

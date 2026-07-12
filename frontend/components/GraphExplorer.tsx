@@ -28,11 +28,11 @@ function PolicyNode({ data }: { data: any }) {
       <Handle type="target" position={Position.Left} className="!bg-blue-500" />
       <Handle type="source" position={Position.Right} className="!bg-blue-500" />
       <div className="flex items-center justify-between">
-        <span className="text-[0.7rem] uppercase tracking-wide text-neutral-500 font-semibold">policy</span>
+        <span className="text-[0.7rem] uppercase tracking-wide text-black font-semibold">policy</span>
         <span className="text-xs font-bold" style={{ color }}>{data.health}</span>
       </div>
       <div className="mt-1 truncate text-sm font-bold text-black">{data.label}</div>
-      <div className="mt-1 flex items-center justify-between text-[0.68rem] text-neutral-600 font-medium">
+      <div className="mt-1 flex items-center justify-between text-[0.68rem] text-black font-medium">
         <span>{data.owner}</span>
         <span>{data.obligations} obl.</span>
       </div>
@@ -61,7 +61,7 @@ function ObligationNode({ data }: { data: any }) {
         </span>
       </div>
       <div className="mt-2 text-xs leading-snug text-black font-medium">{data.label}</div>
-      <div className="mono mt-1 text-[0.62rem] text-neutral-500">{data.policy}{data.section ? ` §${data.section}` : ""}</div>
+      <div className="mono mt-1 text-[0.62rem] text-black">{data.policy}{data.section ? ` §${data.section}` : ""}</div>
     </div>
   );
 }
@@ -102,6 +102,7 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
           id: e.id,
           source: e.source,
           target: e.target,
+          type: "smoothstep",
           label: rel === "RELATED" ? undefined : e.label,
           animated: rel === "CONFLICT" && e.data?.severity === "HIGH",
           style: { stroke: color, strokeWidth: rel === "RELATED" ? 1 : 2 },
@@ -134,49 +135,49 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
         <div className="w-80 shrink-0 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-bold text-black">Node Details</h3>
-            <button onClick={() => setSelectedNode(null)} className="text-neutral-400 hover:text-black">✕</button>
+            <button onClick={() => setSelectedNode(null)} className="text-black hover:text-black">✕</button>
           </div>
           
           {selectedNode.type === "policyNode" ? (
             policyData ? (
               <div className="space-y-4">
                 <div>
-                  <div className="text-xs text-neutral-500 font-semibold uppercase">Title</div>
+                  <div className="text-xs text-black font-semibold uppercase">Title</div>
                   <div className="text-sm text-black font-medium">{policyData.title}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-neutral-500 font-semibold uppercase">Health Score</div>
+                  <div className="text-xs text-black font-semibold uppercase">Health Score</div>
                   <div className="text-sm font-bold mono" style={{ color: scoreColor(policyData.health_score) }}>{policyData.health_score}</div>
                 </div>
                 {blastData && (
                   <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 mt-4 space-y-2">
                     <div className="font-bold text-sm text-black">Blast Radius</div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-neutral-600 font-medium">Potential new conflicts:</span>
+                      <span className="text-black font-medium">Potential new conflicts:</span>
                       <span className="mono font-bold text-black">{blastData.potential_new_findings}</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-neutral-600 font-medium">Governance impact:</span>
+                      <span className="text-black font-medium">Governance impact:</span>
                       <span className="mono font-bold text-black">{blastData.estimated_governance_impact}</span>
                     </div>
-                    <div className="text-xs text-neutral-500 font-medium mt-2">Affected Policies: {blastData.affected_policies?.length || 0}</div>
+                    <div className="text-xs text-black font-medium mt-2">Affected Policies: {blastData.affected_policies?.length || 0}</div>
                   </div>
                 )}
               </div>
-            ) : <div className="text-sm text-neutral-500 font-medium">Loading details...</div>
+            ) : <div className="text-sm text-black font-medium">Loading details...</div>
           ) : (
             <div className="space-y-4">
               <div>
-                <div className="text-xs text-neutral-500 font-semibold uppercase">Action</div>
+                <div className="text-xs text-black font-semibold uppercase">Action</div>
                 <div className="text-sm text-black font-medium">{selectedNode.data.action}</div>
               </div>
               <div>
-                <div className="text-xs text-neutral-500 font-semibold uppercase">Topic</div>
+                <div className="text-xs text-black font-semibold uppercase">Topic</div>
                 <div className="text-sm text-black font-medium">{selectedNode.data.topic}</div>
               </div>
               <div>
-                <div className="text-xs text-neutral-500 font-semibold uppercase">Text</div>
-                <div className="text-xs text-neutral-700 font-medium mt-1 leading-relaxed">{selectedNode.data.label}</div>
+                <div className="text-xs text-black font-semibold uppercase">Text</div>
+                <div className="text-xs text-black font-medium mt-1 leading-relaxed">{selectedNode.data.label}</div>
               </div>
             </div>
           )}
