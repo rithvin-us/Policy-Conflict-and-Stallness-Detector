@@ -45,7 +45,7 @@ See `docs/data-dictionary.md` for the frozen entity contract. Key terms:
 - NIST SP 800-63B — Digital Identity Guidelines (password rotation guidance)
 - EU GDPR Articles 5, 17, 24
 - COBIT 2019 — APO01 Maintain Policy Framework
-- Source challenge brief: *Policy Conflict & Staleness Detector* (Société Générale)
+- Challenge brief source: *Policy Conflict & Staleness Detector* (Société Générale)
 
 ---
 
