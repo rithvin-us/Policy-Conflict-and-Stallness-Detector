@@ -19,12 +19,14 @@ import type {
 } from "./types";
 
 const BASE =
-  typeof window === "undefined"
-    ? (
-        process.env.BACKEND_INTERNAL_URL ||
-        (process.env.NODE_ENV === "production" ? "http://api:8000" : "http://localhost:8000")
-      ) + "/api/v1"
-    : "/api/v1";
+  process.env.NEXT_PUBLIC_API_URL
+    ? process.env.NEXT_PUBLIC_API_URL + "/api/v1"
+    : typeof window === "undefined"
+      ? (
+          process.env.BACKEND_INTERNAL_URL ||
+          (process.env.NODE_ENV === "production" ? "http://api:8000" : "http://localhost:8000")
+        ) + "/api/v1"
+      : "/api/v1";
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
   const res = await fetch(`${BASE}${path}`, {
