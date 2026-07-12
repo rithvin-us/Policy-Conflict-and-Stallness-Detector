@@ -48,7 +48,7 @@ Enterprises accumulate dozens of security & compliance policies written by diffe
 | **Risk Scoring** | Governance health scores with compliance impact analysis |
 | **Knowledge Graph** | Interactive visualization of policy and obligation relationships |
 | **Report Generation** | Markdown, HTML, JSON exports with audit trail |
-| **Webhook Integration** | Listen for policy changes and trigger automatic re-analysis |
+| **Webhook Integration** | Listen for policy changes and trigger automatic re-analysis (with automated GitHub setup) |
 | **Compliance Mapping** | ISO 27001, NIST 800-53, GDPR, COBIT framework references |
 | **Explainability** | Evidence-backed findings with exact triggering text and suggested resolutions |
 | **Zero ML Dependencies** | Pure Python, deterministic engine; optional embeddings upgrade path |
@@ -329,6 +329,23 @@ docker compose -f docker-compose.yml up
 ```bash
 docker compose -f docker-compose.yml --env-file .env.production up -d
 ```
+
+---
+
+## ⚠️ Deployment Disclaimer (Free Tier Constraints)
+
+This application has been successfully deployed and tested using **100% Free Tier Services** (e.g., Render, Vercel, Supabase, or similar platforms). Because it is running on free infrastructure, please be aware of the following operational constraints:
+
+### Things to Take Care Of
+- **Environment Variables**: Ensure all required environment variables (`DATABASE_URL`, `GITHUB_WEBHOOK_SECRET`) are correctly set in your host's dashboard.
+- **Database Limits**: Free tier PostgreSQL databases often have connection limits (e.g., 20 max connections) and storage caps (e.g., 500MB). Monitor your usage if you ingest thousands of policies.
+- **Webhook Routing**: If using Render, ensure your backend's public URL is configured correctly on GitHub. Use the in-app "Register hook" button for automated setup.
+
+### What Could Possibly Fail
+- **Cold Starts**: Free tier backend services (like Render's free web services) spin down after 15 minutes of inactivity. **The first request after a period of inactivity may take 30-50 seconds to respond.** If a webhook is triggered during a cold start, GitHub may time out and report a failed delivery, though it usually retries.
+- **Memory Limits (OOM)**: Free tiers typically offer 512MB of RAM. Since our NLP engine is lightweight and doesn't load massive ML models, it usually stays well within limits. However, ingesting a single monolithic text file (e.g., 100+ pages) in one go might spike memory usage and crash the instance.
+- **Build Timeouts**: Building the Next.js frontend or installing Python dependencies on constrained CI/CD runners can occasionally time out. If a deployment fails on Render/Vercel, clearing the build cache and retrying usually fixes it.
+- **Clock Drift**: Free containers might experience slight clock drifts, which could theoretically affect exact staleness timing, though it is negligible for day-level policy reviews.
 
 ---
 
