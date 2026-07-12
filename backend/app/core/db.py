@@ -44,6 +44,7 @@ engine = create_engine(
     settings.DATABASE_URL,
     connect_args=_connect_args,
     pool_pre_ping=True,
+    pool_recycle=1800,
     future=True,
 )
 

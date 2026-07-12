@@ -239,12 +239,16 @@ def register_webhook(body: WebhookRegisterRequest,
             "event_types": body.event_types}
 
 
+async def _get_raw_body(request: Request) -> bytes:
+    return await request.body()
+
+
 @router.post("/webhooks/{connector}")
-async def ingest_webhook(connector: str, request: Request,
-                         db: Session = Depends(get_db)) -> dict:
+def ingest_webhook(connector: str, request: Request,
+                   raw_body: bytes = Depends(_get_raw_body),
+                   db: Session = Depends(get_db)) -> dict:
     # Read the RAW body first — signature verification must run over the exact
     # bytes GitHub signed, before any JSON re-encoding.
-    raw_body = await request.body()
     source = connector.upper()
 
     if source == "GITHUB":
