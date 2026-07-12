@@ -55,7 +55,7 @@ function ObligationNode({ data }: { data: any }) {
       <Handle type="target" position={Position.Left} className="!bg-blue-500" />
       <Handle type="source" position={Position.Right} className="!bg-blue-500" />
       <div className="flex items-center justify-between">
-        <span className="chip bg-neutral-100 text-neutral-700 font-semibold ring-1 ring-neutral-200">{data.topic}</span>
+        <span className="chip bg-neutral-100 text-black font-bold ring-1 ring-neutral-200">{data.topic}</span>
         <span className="mono text-[0.66rem] font-bold" style={{ color: STRENGTH_COLOR[data.strength] }}>
           {data.polarity === "NEGATE" ? "¬" : ""}{data.action}
         </span>

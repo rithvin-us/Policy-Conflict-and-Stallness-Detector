@@ -46,7 +46,7 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
             {(data.obligations || []).map((o: any) => (
               <div key={o.id} className="rounded-lg border border-white/5 bg-ink-850/50 p-3">
                 <div className="mb-1 flex items-center gap-2">
-                  <span className="chip bg-white/5 text-slate-300 ring-1 ring-white/10">{o.topic}</span>
+                  <span className="chip bg-neutral-100 text-black font-bold ring-1 ring-neutral-200">{o.topic}</span>
                   <span className="mono text-xs text-accent-soft">
                     {o.polarity === "NEGATE" ? "¬" : ""}{o.action}
                   </span>
