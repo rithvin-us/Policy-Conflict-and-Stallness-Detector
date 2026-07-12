@@ -262,8 +262,32 @@ def delete_connector(connector_id: str, db: Session = Depends(get_db)):
     connector = db.get(Connector, connector_id)
     if not connector:
         raise HTTPException(404, f"Connector {connector_id} not found")
+
+    # Determine the source prefix used by policies ingested from this connector
+    source_prefix = None
+    if connector.type == "GITHUB":
+        repo = (connector.config or {}).get("repo")
+        if repo:
+            source_prefix = f"github:{repo}"
+    elif connector.type == "LOCAL_FOLDER":
+        path = (connector.config or {}).get("path")
+        if path:
+            import os
+            source_prefix = f"local:{os.path.basename(path)}"
+
+    # If we found a prefix, delete all matching policies
+    if source_prefix:
+        from app.models import Policy
+        policies = db.query(Policy).filter(Policy.source.startswith(source_prefix)).all()
+        for p in policies:
+            db.delete(p)
+            
     db.delete(connector)
     db.commit()
+    
+    # Run analysis to purge any conflicts/obligations from the deleted policies
+    run_analysis(db)
+    
     return None
 
 @router.patch("/connectors/{connector_id}")
