@@ -55,6 +55,17 @@ NEGATION_MARKERS = (
     "cannot",
 )
 
+# Action pairs that mean the opposite of each other. Used both to classify
+# action-contradictions and to resolve double negatives during extraction
+# (a negated action == an affirmation of its opposite, e.g. "not deleted" ==
+# "retained").
+OPPOSING_ACTIONS = [
+    frozenset({"retain", "delete"}),
+    frozenset({"use", "bypass"}),
+    frozenset({"enforce", "bypass"}),
+    frozenset({"rotate", "bypass"}),
+]
+
 # --- Topic classification --------------------------------------------------
 # First matching topic (in dict order) wins; keys are compiled to word-boundary
 # regexes for precision.

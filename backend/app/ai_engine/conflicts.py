@@ -24,13 +24,9 @@ from . import types as T
 from .similarity import semantic_similarity
 from .types import Conflict, Evidence, Obligation, PolicyInput, Scope
 
-# Different surface actions that are semantically opposed.
-_OPPOSING_ACTIONS = [
-    frozenset({"retain", "delete"}),
-    frozenset({"use", "bypass"}),
-    frozenset({"enforce", "bypass"}),
-    frozenset({"rotate", "bypass"}),
-]
+# Different surface actions that are semantically opposed (shared with the
+# extractor, which uses them to resolve double negatives like "not deleted").
+_OPPOSING_ACTIONS = L.OPPOSING_ACTIONS
 
 _SIM_REDUNDANT = 0.50   # min text similarity to call two obligations redundant
 
@@ -61,9 +57,11 @@ def _is_action_contradiction(a: Obligation, b: Obligation) -> bool:
     return pair in _OPPOSING_ACTIONS
 
 
-def _params_differ(a: Obligation, b: Obligation) -> bool:
+def _params_differ(a: Obligation, b: Obligation, ignore: tuple[str, ...] = ()) -> bool:
     keys = ["duration_days", "min_length", "history_count", "algorithm", "tls_version", "timeout_minutes", "port", "key_size"]
     for k in keys:
+        if k in ignore:
+            continue
         va = a.parameters.get(k)
         vb = b.parameters.get(k)
         if va is not None and vb is not None and va != vb:
@@ -183,7 +181,10 @@ def _classify_contradiction(cid: str, a: Obligation, b: Obligation,
 def _detect_redundancy(cid: str, a: Obligation, b: Obligation) -> Optional[Conflict]:
     if a.action != b.action or a.polarity != b.polarity or a.action == "comply":
         return None
-    if _params_differ(a, b):
+    # TLS versions are stated as floors ("TLS 1.2 or higher"), so differing
+    # minimums are compatible rather than conflicting — the stricter one subsumes
+    # the looser. Don't let that block redundancy detection of duplicate mandates.
+    if _params_differ(a, b, ignore=("tls_version",)):
         return None
     sim = semantic_similarity(a.evidence_text, b.evidence_text)
     if sim < _SIM_REDUNDANT:

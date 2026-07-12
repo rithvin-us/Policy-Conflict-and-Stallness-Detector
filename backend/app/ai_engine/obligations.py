@@ -41,11 +41,32 @@ def _detect_strength(sentence_lower: str) -> Optional[str]:
     return None
 
 
-def _detect_polarity(sentence_lower: str) -> str:
-    for marker in L.NEGATION_MARKERS:
-        if marker in sentence_lower:
-            return T.NEGATE
-    return T.AFFIRM
+def _detect_polarity(sentence_lower: str, action: str) -> str:
+    """Sentence-level negation, but bound to the verb the negation governs.
+
+    A negation flips the resolved ``action`` only when it applies to that action
+    (or to nothing verbal). When the negation instead governs the *opposite*
+    action, it is a double negative that affirms the resolved action — e.g.
+    "must not be deleted" with action ``retain`` means the data IS retained, not
+    a spurious "do not retain". Without this, that sentence contradicts a plain
+    "must be retained" and raises a false HIGH conflict.
+    """
+    neg_pos = min(
+        (sentence_lower.find(m) for m in L.NEGATION_MARKERS if m in sentence_lower),
+        default=-1,
+    )
+    if neg_pos == -1:
+        return T.AFFIRM
+    # The first action verb after the negation marker is the one it governs.
+    governed = next(
+        (L.ACTION_SYNONYMS[t] for t in _WORD_RE.findall(sentence_lower[neg_pos:])
+         if t in L.ACTION_SYNONYMS),
+        None,
+    )
+    if (governed is not None and governed != action
+            and frozenset({governed, action}) in L.OPPOSING_ACTIONS):
+        return T.AFFIRM
+    return T.NEGATE
 
 
 def _detect_topics(sentence_lower: str) -> list[str]:
@@ -165,7 +186,7 @@ def extract_obligations(policy: PolicyInput) -> list[Obligation]:
                 action=action,
                 scope=_detect_scope(lower),
                 strength=strength,
-                polarity=_detect_polarity(lower),
+                polarity=_detect_polarity(lower, action),
                 parameters=_extract_parameters(sentence),
                 evidence_text=sentence,
                 confidence=_confidence(strength, topics[0], action),
