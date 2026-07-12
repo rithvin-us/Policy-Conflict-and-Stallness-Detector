@@ -1,7 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  output: "standalone",
   async rewrites() {
     // Proxy /api to the backend so the browser talks to a single origin.
     const api =
