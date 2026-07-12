@@ -15,28 +15,28 @@ import { api } from "@/lib/api";
 import { scoreColor, severityColor } from "./ui";
 
 const RELATION_COLOR: Record<string, string> = {
-  CONFLICT: "#f0476b",
-  REDUNDANT: "#f5a524",
-  RELATED: "#3a466b",
-  BELONGS_TO: "#26304f",
+  CONFLICT: "#e11d48",
+  REDUNDANT: "#d97706",
+  RELATED: "#94a3b8",
+  BELONGS_TO: "#cbd5e1",
 };
 
 function PolicyNode({ data }: { data: any }) {
   const color = scoreColor(data.health ?? 100);
   return (
-    <div className="w-48 rounded-xl border border-white/10 bg-ink-850/95 p-3 shadow-panel">
-      <Handle type="target" position={Position.Left} className="!bg-accent" />
-      <Handle type="source" position={Position.Right} className="!bg-accent" />
+    <div className="w-48 rounded-xl border border-neutral-300 bg-neutral-100 p-3 shadow-sm">
+      <Handle type="target" position={Position.Left} className="!bg-blue-500" />
+      <Handle type="source" position={Position.Right} className="!bg-blue-500" />
       <div className="flex items-center justify-between">
-        <span className="text-[0.7rem] uppercase tracking-wide text-slate-500">policy</span>
-        <span className="text-xs font-semibold" style={{ color }}>{data.health}</span>
+        <span className="text-[0.7rem] uppercase tracking-wide text-neutral-500 font-semibold">policy</span>
+        <span className="text-xs font-bold" style={{ color }}>{data.health}</span>
       </div>
-      <div className="mt-1 truncate text-sm font-medium text-slate-100">{data.label}</div>
-      <div className="mt-1 flex items-center justify-between text-[0.68rem] text-slate-500">
+      <div className="mt-1 truncate text-sm font-bold text-black">{data.label}</div>
+      <div className="mt-1 flex items-center justify-between text-[0.68rem] text-neutral-600 font-medium">
         <span>{data.owner}</span>
         <span>{data.obligations} obl.</span>
       </div>
-      <div className="mt-2 h-1 overflow-hidden rounded-full bg-white/5">
+      <div className="mt-2 h-1 overflow-hidden rounded-full bg-neutral-200">
         <div className="h-full rounded-full" style={{ width: `${data.health}%`, background: color }} />
       </div>
     </div>
@@ -44,24 +44,24 @@ function PolicyNode({ data }: { data: any }) {
 }
 
 const STRENGTH_COLOR: Record<string, string> = {
-  MANDATORY: "#f0476b",
-  RECOMMENDED: "#f5a524",
-  OPTIONAL: "#3aa0ff",
+  MANDATORY: "#e11d48",
+  RECOMMENDED: "#d97706",
+  OPTIONAL: "#0284c7",
 };
 
 function ObligationNode({ data }: { data: any }) {
   return (
-    <div className="w-56 rounded-lg border border-white/10 bg-ink-850/95 p-3 shadow-panel">
-      <Handle type="target" position={Position.Left} className="!bg-accent" />
-      <Handle type="source" position={Position.Right} className="!bg-accent" />
+    <div className="w-56 rounded-lg border border-neutral-200 bg-white p-3 shadow-sm">
+      <Handle type="target" position={Position.Left} className="!bg-blue-500" />
+      <Handle type="source" position={Position.Right} className="!bg-blue-500" />
       <div className="flex items-center justify-between">
-        <span className="chip bg-white/5 text-slate-300 ring-1 ring-white/10">{data.topic}</span>
-        <span className="mono text-[0.66rem]" style={{ color: STRENGTH_COLOR[data.strength] }}>
+        <span className="chip bg-neutral-100 text-neutral-700 font-semibold ring-1 ring-neutral-200">{data.topic}</span>
+        <span className="mono text-[0.66rem] font-bold" style={{ color: STRENGTH_COLOR[data.strength] }}>
           {data.polarity === "NEGATE" ? "¬" : ""}{data.action}
         </span>
       </div>
-      <div className="mt-2 text-xs leading-snug text-slate-300">{data.label}</div>
-      <div className="mono mt-1 text-[0.62rem] text-slate-600">{data.policy}{data.section ? ` §${data.section}` : ""}</div>
+      <div className="mt-2 text-xs leading-snug text-black font-medium">{data.label}</div>
+      <div className="mono mt-1 text-[0.62rem] text-neutral-500">{data.policy}{data.section ? ` §${data.section}` : ""}</div>
     </div>
   );
 }
@@ -97,7 +97,7 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
         const color =
           rel === "CONFLICT" && e.data?.severity
             ? severityColor(e.data.severity)
-            : RELATION_COLOR[rel] || "#3a466b";
+            : RELATION_COLOR[rel] || "#94a3b8";
         return {
           id: e.id,
           source: e.source,
@@ -105,8 +105,8 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
           label: rel === "RELATED" ? undefined : e.label,
           animated: rel === "CONFLICT" && e.data?.severity === "HIGH",
           style: { stroke: color, strokeWidth: rel === "RELATED" ? 1 : 2 },
-          labelStyle: { fill: color, fontSize: 10 },
-          labelBgStyle: { fill: "#0b1020" },
+          labelStyle: { fill: color, fontSize: 10, fontWeight: "bold" },
+          labelBgStyle: { fill: "#ffffff" },
         };
       }),
     [payload],
@@ -114,7 +114,7 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
 
   return (
     <div className="flex gap-4 h-[70vh] w-full">
-      <div className="flex-1 overflow-hidden rounded-xl border border-white/5">
+      <div className="flex-1 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-50">
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -125,58 +125,58 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
           onNodeClick={(_, node) => setSelectedNode(node)}
           onPaneClick={() => setSelectedNode(null)}
         >
-          <Background color="#1c2540" gap={22} />
-          <Controls showInteractive={false} />
+          <Background color="#cbd5e1" gap={22} />
+          <Controls showInteractive={false} className="bg-white border border-neutral-200 shadow-sm" />
         </ReactFlow>
       </div>
 
       {selectedNode && (
-        <div className="w-80 shrink-0 overflow-y-auto rounded-xl border border-white/5 bg-ink-850/95 p-4 shadow-panel">
+        <div className="w-80 shrink-0 overflow-y-auto rounded-xl border border-neutral-200 bg-white p-4 shadow-sm">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-slate-100">Node Details</h3>
-            <button onClick={() => setSelectedNode(null)} className="text-slate-500 hover:text-slate-300">✕</button>
+            <h3 className="font-bold text-black">Node Details</h3>
+            <button onClick={() => setSelectedNode(null)} className="text-neutral-400 hover:text-black">✕</button>
           </div>
           
           {selectedNode.type === "policyNode" ? (
             policyData ? (
               <div className="space-y-4">
                 <div>
-                  <div className="text-xs text-slate-500">Title</div>
-                  <div className="text-sm text-slate-200">{policyData.title}</div>
+                  <div className="text-xs text-neutral-500 font-semibold uppercase">Title</div>
+                  <div className="text-sm text-black font-medium">{policyData.title}</div>
                 </div>
                 <div>
-                  <div className="text-xs text-slate-500">Health Score</div>
-                  <div className="text-sm font-mono" style={{ color: scoreColor(policyData.health_score) }}>{policyData.health_score}</div>
+                  <div className="text-xs text-neutral-500 font-semibold uppercase">Health Score</div>
+                  <div className="text-sm font-bold mono" style={{ color: scoreColor(policyData.health_score) }}>{policyData.health_score}</div>
                 </div>
                 {blastData && (
-                  <div className="rounded border border-white/5 bg-white/5 p-3 mt-4 space-y-2">
-                    <div className="font-semibold text-sm text-slate-300">Blast Radius</div>
+                  <div className="rounded-lg border border-neutral-200 bg-neutral-50 p-3 mt-4 space-y-2">
+                    <div className="font-bold text-sm text-black">Blast Radius</div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Potential new conflicts:</span>
-                      <span className="mono">{blastData.potential_new_findings}</span>
+                      <span className="text-neutral-600 font-medium">Potential new conflicts:</span>
+                      <span className="mono font-bold text-black">{blastData.potential_new_findings}</span>
                     </div>
                     <div className="flex justify-between text-xs">
-                      <span className="text-slate-400">Governance impact:</span>
-                      <span className="mono">{blastData.estimated_governance_impact}</span>
+                      <span className="text-neutral-600 font-medium">Governance impact:</span>
+                      <span className="mono font-bold text-black">{blastData.estimated_governance_impact}</span>
                     </div>
-                    <div className="text-xs text-slate-400 mt-2">Affected Policies: {blastData.affected_policies?.length || 0}</div>
+                    <div className="text-xs text-neutral-500 font-medium mt-2">Affected Policies: {blastData.affected_policies?.length || 0}</div>
                   </div>
                 )}
               </div>
-            ) : <div className="text-sm text-slate-500">Loading details...</div>
+            ) : <div className="text-sm text-neutral-500 font-medium">Loading details...</div>
           ) : (
             <div className="space-y-4">
               <div>
-                <div className="text-xs text-slate-500">Action</div>
-                <div className="text-sm text-slate-200">{selectedNode.data.action}</div>
+                <div className="text-xs text-neutral-500 font-semibold uppercase">Action</div>
+                <div className="text-sm text-black font-medium">{selectedNode.data.action}</div>
               </div>
               <div>
-                <div className="text-xs text-slate-500">Topic</div>
-                <div className="text-sm text-slate-200">{selectedNode.data.topic}</div>
+                <div className="text-xs text-neutral-500 font-semibold uppercase">Topic</div>
+                <div className="text-sm text-black font-medium">{selectedNode.data.topic}</div>
               </div>
               <div>
-                <div className="text-xs text-slate-500">Text</div>
-                <div className="text-xs text-slate-400 mt-1">{selectedNode.data.label}</div>
+                <div className="text-xs text-neutral-500 font-semibold uppercase">Text</div>
+                <div className="text-xs text-neutral-700 font-medium mt-1 leading-relaxed">{selectedNode.data.label}</div>
               </div>
             </div>
           )}
