@@ -88,6 +88,14 @@ export const api = {
       body: JSON.stringify({ connector_id, event_types, github_token }),
     }),
 
+  // GitHub automated onboarding
+  githubOrgs: (token: string) => 
+    req<any[]>("/github/orgs", { headers: { Authorization: `Bearer ${token}` } }),
+  githubRepos: (token: string, org?: string) => 
+    req<List<any>>(`/github/repos${org ? `?org=${encodeURIComponent(org)}` : ""}`, { headers: { Authorization: `Bearer ${token}` } }),
+  bulkGitHubConnect: (token: string, repos: any[]) =>
+    req<any>("/connectors/bulk-github", { method: "POST", body: JSON.stringify({ github_token: token, repositories: repos }) }),
+
   // Continuous governance / GitHub integration.
   githubStatus: () => req<GithubStatus>("/github/status"),
   audit: (q = "") => req<List<AuditEvent>>(`/audit${q}`),

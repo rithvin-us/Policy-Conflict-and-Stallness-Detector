@@ -37,6 +37,17 @@ class WebhookRegisterRequest(BaseModel):
     github_token: Optional[str] = None
 
 
+class BulkGitHubRepo(BaseModel):
+    repo: str
+    branch: str = "main"
+    path: str = "policies/"
+
+
+class BulkGitHubConnectorRequest(BaseModel):
+    github_token: str
+    repositories: list[BulkGitHubRepo]
+
+
 class AnalysisRunRequest(BaseModel):
     policy_ids: Optional[list[str]] = None
 

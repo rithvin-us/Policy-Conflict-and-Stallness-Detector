@@ -6,6 +6,7 @@ from fastapi import APIRouter
 from app.api.routes import (
     analysis,
     findings,
+    github,
     governance,
     graph,
     policies,
@@ -15,6 +16,7 @@ from app.api.routes import (
 
 api_router = APIRouter()
 api_router.include_router(system.router, tags=["system"])
+api_router.include_router(github.router, prefix="/github", tags=["github"])
 api_router.include_router(policies.router, tags=["policies"])
 api_router.include_router(findings.router, tags=["findings"])
 api_router.include_router(graph.router, tags=["graph"])

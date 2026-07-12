@@ -32,20 +32,24 @@ export default function RootLayout({
   );
 }
 
+import { Clock } from "@/components/Clock";
+
 function TopBar() {
   return (
     <header className="flex h-14 shrink-0 items-center justify-between border-b border-white/5 bg-ink-900/40 px-6">
       <div className="flex items-center gap-2 text-xs text-black">
-        <span className="mono text-black">policy-guardian</span>
+        <span className="mono text-black">Sentinal</span>
         <span>/</span>
         <span>governance operations console</span>
       </div>
-      <div className="flex items-center gap-3 text-xs">
-        <span className="flex items-center gap-1.5 text-severity-ok">
+      <div className="flex items-center gap-4 text-xs">
+        <Clock />
+        <div className="h-4 w-px bg-neutral-200" />
+        <span className="flex items-center gap-1.5 text-severity-ok font-bold">
           <span className="h-1.5 w-1.5 animate-pulseline rounded-full bg-current" />
-          live
+          SYSTEM LIVE
         </span>
-        <span className="kbd">compliance manager</span>
+        <span className="kbd ml-2">compliance manager</span>
       </div>
     </header>
   );

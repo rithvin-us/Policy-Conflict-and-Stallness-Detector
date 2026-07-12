@@ -87,7 +87,7 @@ export default function ConnectorsPage() {
         </p>
       </div>
 
-      <AddConnector onDone={() => connectors.reload()} />
+      <GitHubOnboarding onDone={() => connectors.reload()} />
 
       <Panel title="Connectors">
         <div className="grid gap-4 md:grid-cols-2">
@@ -205,8 +205,89 @@ export default function ConnectorsPage() {
   );
 }
 
-function AddConnector({ onDone }: { onDone: () => void }) {
+import { RepoPicker } from "@/components/github/RepoPicker";
+
+function GitHubOnboarding({ onDone }: { onDone: () => void }) {
+  const [step, setStep] = useState<"SELECT_TYPE" | "GITHUB_AUTH" | "GITHUB_PICKER" | "LEGACY">("SELECT_TYPE");
+  const [token, setToken] = useState("");
   const [type, setType] = useState("GITHUB");
+
+  if (step === "SELECT_TYPE") {
+    return (
+      <Panel title="Connect a new source">
+        <div className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="w-full sm:w-1/3">
+            <label className="block text-xs font-bold text-black uppercase mb-1">Source Type</label>
+            <select 
+              value={type} 
+              onChange={(e) => setType(e.target.value)}
+              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm"
+            >
+              {["GITHUB", "LOCAL_FOLDER", "GITLAB", "BITBUCKET", "GOOGLE_DRIVE", "SHAREPOINT"].map((t) => (
+                <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
+              ))}
+            </select>
+          </div>
+          <button 
+            onClick={() => setStep(type === "GITHUB" ? "GITHUB_AUTH" : "LEGACY")}
+            className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
+          >
+            Continue
+          </button>
+        </div>
+      </Panel>
+    );
+  }
+
+  if (step === "GITHUB_AUTH") {
+    return (
+      <Panel title="Connect GitHub">
+        <div className="max-w-xl">
+          <p className="text-sm text-black font-medium mb-4">
+            Provide a GitHub Personal Access Token (PAT) with <code className="bg-neutral-100 px-1 rounded">repo</code> scope. We will securely fetch your organizations and repositories so you can configure them with zero manual typing.
+          </p>
+          <input 
+            type="password"
+            value={token} 
+            onChange={e => setToken(e.target.value)}
+            placeholder="ghp_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+            className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm font-mono text-black focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-neutral-400 mb-4"
+          />
+          <div className="flex gap-3">
+            <button 
+              onClick={() => setStep("SELECT_TYPE")}
+              className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-black transition hover:bg-neutral-50"
+            >
+              Back
+            </button>
+            <button 
+              onClick={() => { if (token.length > 10) setStep("GITHUB_PICKER"); }}
+              disabled={token.length < 10}
+              className="rounded-lg bg-black px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-50"
+            >
+              Authenticate
+            </button>
+          </div>
+        </div>
+      </Panel>
+    );
+  }
+
+  if (step === "GITHUB_PICKER") {
+    return (
+      <RepoPicker 
+        token={token} 
+        onSuccess={() => { setStep("SELECT_TYPE"); setToken(""); onDone(); }}
+        onCancel={() => setStep("SELECT_TYPE")}
+      />
+    );
+  }
+
+  return <LegacyConnector type={type} onDone={() => { setStep("SELECT_TYPE"); onDone(); }} onCancel={() => setStep("SELECT_TYPE")} />;
+}
+
+
+function LegacyConnector({ type, onDone, onCancel }: { type: string, onDone: () => void, onCancel: () => void }) {
   const [name, setName] = useState("");
   const [repo, setRepo] = useState("");
   const [path, setPath] = useState("");
@@ -242,14 +323,8 @@ function AddConnector({ onDone }: { onDone: () => void }) {
   }
 
   return (
-    <Panel title="Add a source">
-      <div className="grid gap-4 md:grid-cols-4">
-        <select value={type} onChange={(e) => setType(e.target.value)}
-          className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm">
-          {["GITHUB", "LOCAL_FOLDER", "GITLAB", "BITBUCKET", "GOOGLE_DRIVE", "SHAREPOINT", "SLACK", "TEAMS"].map((t) => (
-            <option key={t} value={t}>{t.replace(/_/g, " ")}</option>
-          ))}
-        </select>
+    <Panel title={`Add ${type.replace(/_/g, " ")} source`}>
+      <div className="grid gap-4 md:grid-cols-3">
         <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name"
           className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
         {type === "GITHUB" ? (
@@ -260,7 +335,8 @@ function AddConnector({ onDone }: { onDone: () => void }) {
           className="rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm text-black font-medium focus:border-blue-500 focus:outline-none shadow-sm placeholder:text-black" />
       </div>
       {err && <div className="mt-3 p-3 rounded-lg bg-red-50 border border-red-200 text-sm text-red-700 font-bold">{err}</div>}
-      <div className="mt-4 flex justify-end">
+      <div className="mt-4 flex justify-end gap-3">
+        <button onClick={onCancel} className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-bold text-black transition hover:bg-neutral-50">Cancel</button>
         <button onClick={submit} disabled={busy}
           className="rounded-lg bg-blue-600 px-5 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50">
           {busy ? "Connecting…" : "Add connector"}

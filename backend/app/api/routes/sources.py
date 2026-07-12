@@ -98,6 +98,93 @@ def connector_health(connector_id: str, db: Session = Depends(get_db)) -> dict:
             "error_message": connector.error_message}
 
 
+from app.schemas import BulkGitHubConnectorRequest
+
+@router.post("/connectors/bulk-github", status_code=201)
+def create_bulk_github_connectors(body: BulkGitHubConnectorRequest,
+                                  request: Request,
+                                  db: Session = Depends(get_db)) -> dict:
+    created_connectors = []
+    
+    # 1. Create all connectors
+    for repo_info in body.repositories:
+        cfg = {
+            "repo": repo_info.repo,
+            "branch": repo_info.branch,
+            "path": repo_info.path
+        }
+        connector = Connector(
+            id=new_id("con"), type="GITHUB", 
+            name=repo_info.repo, config=cfg, status="NOT_CONFIGURED"
+        )
+        # Verify reachability using the provided token
+        # We temporarily inject the token so the instantiate check works
+        temp_cfg = cfg.copy()
+        temp_cfg["__temp_token"] = body.github_token
+        connector.config = temp_cfg
+        impl = connector_manager.instantiate(connector)
+        # Hack to inject token to the impl
+        import os
+        os.environ["__temp_gh_token"] = body.github_token
+        impl.config["token_env"] = "__temp_gh_token"
+        
+        connector.status = impl.verify()
+        
+        # Remove temp token before saving
+        connector.config = cfg
+        db.add(connector)
+        created_connectors.append(connector)
+        
+    db.commit()
+    
+    # 2. Register Webhooks for all
+    base_url = str(request.base_url).rstrip("/")
+    api_url = settings.API_URL if hasattr(settings, "API_URL") and settings.API_URL else base_url
+    webhook_url = f"{api_url}/api/v1/webhooks/github"
+    
+    import httpx
+    headers = {
+        "Authorization": f"Bearer {body.github_token}",
+        "Accept": "application/vnd.github+json",
+        "X-GitHub-Api-Version": "2022-11-28"
+    }
+    
+    registered = 0
+    for connector in created_connectors:
+        secret_ref = new_id("whsec")
+        cfg = dict(connector.config or {})
+        cfg["webhook_secret_ref"] = secret_ref
+        cfg["webhook_events"] = ["push", "pull_request"]
+        connector.config = cfg
+        
+        repo = cfg.get("repo")
+        gh_url = f"https://api.github.com/repos/{repo}/hooks"
+        gh_payload = {
+            "name": "web",
+            "active": True,
+            "events": ["push", "pull_request"],
+            "config": {
+                "url": webhook_url,
+                "content_type": "json",
+                "secret": settings.GITHUB_WEBHOOK_SECRET
+            }
+        }
+        
+        response = httpx.post(gh_url, headers=headers, json=gh_payload)
+        if response.status_code in (200, 201):
+            registered += 1
+        else:
+            log.warning(f"Failed to create webhook for {repo}", extra={"extra_fields": {"response": response.text}})
+            
+    db.commit()
+    
+    return {
+        "created": len(created_connectors),
+        "webhooks_registered": registered,
+        "items": [connector_to_dict(c) for c in created_connectors]
+    }
+
+
 # --------------------------- webhooks --------------------------------------
 
 @router.post("/webhooks/register")
