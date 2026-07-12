@@ -10,6 +10,9 @@ FROM node:20-alpine AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY frontend/ ./
+# Emit .next/standalone (server.js) for the runner stage below. Vercel does NOT
+# set this flag, so its build stays non-standalone (avoids the 404 regression).
+ENV NEXT_OUTPUT_STANDALONE=1
 RUN npm run build
 
 FROM node:20-alpine AS runner

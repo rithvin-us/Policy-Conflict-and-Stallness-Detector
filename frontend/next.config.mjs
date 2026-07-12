@@ -1,6 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // Standalone output is only for the self-contained Docker image (server.js).
+  // It is gated behind an env flag the Dockerfile sets, so Vercel builds WITHOUT
+  // it -- standalone mode was what broke the Vercel 404 (see commit 44ac7b2).
+  output: process.env.NEXT_OUTPUT_STANDALONE ? "standalone" : undefined,
   async rewrites() {
     // Proxy /api to the backend so the browser talks to a single origin.
     const api =

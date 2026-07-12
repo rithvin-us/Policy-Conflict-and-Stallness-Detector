@@ -29,7 +29,9 @@ def _rebuild_engine_conflict(c: Conflict):
         explanation=c.explanation,
         evidence=Evidence(a=ev.get("a", {}), b=ev.get("b", {}),
                           trigger_terms=ev.get("trigger_terms", [])),
-        confidence=c.confidence, scope_analysis=c.scope_analysis,
+        confidence=c.confidence,
+        confidence_factors=c.confidence_factors or [],
+        scope_analysis=c.scope_analysis,
         resolution_suggestion=c.resolution_suggestion,
         compliance_impact=c.compliance_impact or [],
     )
