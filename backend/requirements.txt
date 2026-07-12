@@ -13,8 +13,12 @@ redis>=5.0
 # Postgres driver (used when DATABASE_URL points at Postgres).
 psycopg[binary]>=3.1
 
-# SingleStore driver + SQLAlchemy dialect (used when DATABASE_URL is singlestoredb://).
+# SingleStore support (used when DATABASE_URL is singlestore(db)://).
+#   singlestoredb          -> DBAPI driver
+#   sqlalchemy-singlestoredb -> registers the ``singlestoredb`` SQLAlchemy dialect
+#                               (without it, create_engine raises NoSuchModuleError)
 singlestoredb>=1.7
+sqlalchemy-singlestoredb>=1.2
 
 # Testing
 pytest>=8.0
