@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: policy-guardian-backend
+    env: python
+    region: ohio # Default US region
+    plan: free
+    buildCommand: "cd backend && pip install -r requirements.txt"
+    startCommand: "cd backend && uvicorn app.main:app --host 0.0.0.0 --port 10000"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.0
+      - key: SEED_ON_STARTUP
+        value: "1"
+      - key: CORS_ORIGINS
+        value: "https://your-frontend-project.vercel.app" # UPDATE THIS IN RENDER DASHBOARD
+      - key: GITHUB_TOKEN
+        value: "" # Optional: Add your PAT here in the Render dashboard
