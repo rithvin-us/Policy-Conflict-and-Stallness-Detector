@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { useEventStream } from "@/lib/useEventStream";
@@ -41,10 +41,15 @@ export default function ConnectorsPage() {
   }
 
   async function registerHook(c: any) {
+    const savedToken = typeof window !== "undefined" ? localStorage.getItem("github_pat") : null;
     const token = prompt(
-      "Enter a GitHub Personal Access Token (with repo_hook scope) to automatically set up the webhook on GitHub.\n\nLeave blank if you prefer to set it up manually."
+      "Enter a GitHub Personal Access Token (with repo_hook scope) to automatically set up the webhook on GitHub.\n\nLeave blank if you prefer to set it up manually.",
+      savedToken || ""
     );
     if (token === null) return; // user cancelled the prompt
+    if (token) {
+      if (typeof window !== "undefined") localStorage.setItem("github_pat", token);
+    }
 
     setBusy(c.id);
     try {
@@ -250,6 +255,13 @@ function GitHubOnboarding({ onDone }: { onDone: () => void }) {
   const [token, setToken] = useState("");
   const [type, setType] = useState("GITHUB");
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("github_pat");
+      if (saved) setToken(saved);
+    }
+  }, []);
+
   if (step === "SELECT_TYPE") {
     return (
       <Panel title="Connect a new source">
@@ -267,7 +279,13 @@ function GitHubOnboarding({ onDone }: { onDone: () => void }) {
             </select>
           </div>
           <button 
-            onClick={() => setStep(type === "GITHUB" ? "GITHUB_AUTH" : "LEGACY")}
+            onClick={() => {
+              if (type === "GITHUB") {
+                setStep(token.length > 10 ? "GITHUB_PICKER" : "GITHUB_AUTH");
+              } else {
+                setStep("LEGACY");
+              }
+            }}
             className="rounded-lg bg-blue-600 px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700"
           >
             Continue
@@ -299,7 +317,12 @@ function GitHubOnboarding({ onDone }: { onDone: () => void }) {
               Back
             </button>
             <button 
-              onClick={() => { if (token.length > 10) setStep("GITHUB_PICKER"); }}
+              onClick={() => { 
+                if (token.length > 10) {
+                  if (typeof window !== "undefined") localStorage.setItem("github_pat", token);
+                  setStep("GITHUB_PICKER"); 
+                }
+              }}
               disabled={token.length < 10}
               className="rounded-lg bg-black px-6 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-neutral-800 disabled:opacity-50"
             >
@@ -315,7 +338,7 @@ function GitHubOnboarding({ onDone }: { onDone: () => void }) {
     return (
       <RepoPicker 
         token={token} 
-        onSuccess={() => { setStep("SELECT_TYPE"); setToken(""); onDone(); }}
+        onSuccess={() => { setStep("SELECT_TYPE"); onDone(); }}
         onCancel={() => setStep("SELECT_TYPE")}
       />
     );

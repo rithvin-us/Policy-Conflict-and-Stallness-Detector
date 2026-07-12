@@ -18,6 +18,7 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
   const [loadingRepos, setLoadingRepos] = useState(false);
   const [selectedRepoIds, setSelectedRepoIds] = useState<Set<number>>(new Set());
   const [repoPaths, setRepoPaths] = useState<Record<number, string>>({});
+  const [repoDirectories, setRepoDirectories] = useState<Record<number, string[]>>({});
   const [search, setSearch] = useState("");
   const [submitting, setSubmitting] = useState(false);
 
@@ -60,11 +61,13 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
       if (repo) {
         try {
           const treeData = await api.githubRepoTree(token, repo.full_name, repo.default_branch || "main");
-          const candidates = ["policies", "security", "governance", "docs/policies"];
-          const found = treeData.tree
+          const allDirs = treeData.tree
             .filter((item: any) => item.type === "tree")
-            .map((item: any) => item.path)
-            .filter((path: string) => candidates.includes(path.toLowerCase()));
+            .map((item: any) => item.path);
+          setRepoDirectories(prev => ({ ...prev, [id]: allDirs }));
+
+          const candidates = ["policies", "security", "governance", "docs/policies"];
+          const found = allDirs.filter((path: string) => candidates.includes(path.toLowerCase()));
           
           if (found.length > 0) {
             setRepoPaths(prev => ({ ...prev, [id]: found.map((p: string) => p + "/").join(", ") }));
@@ -203,15 +206,46 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
                       </div>
                     </div>
                     {selectedRepoIds.has(repo.id) && (
-                      <div className="mt-3 pl-14">
-                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Policy Folders (comma separated)</label>
+                      <div className="mt-3 pl-14" onClick={(e) => e.stopPropagation()}>
+                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-2">Select Folders</label>
+                        {repoDirectories[repo.id] && repoDirectories[repo.id].length > 0 && (
+                          <div className="mb-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {repoDirectories[repo.id].map(dir => {
+                              const currentPaths = (repoPaths[repo.id] !== undefined ? repoPaths[repo.id] : "policies/").split(",").map(p => p.trim()).filter(Boolean);
+                              const isChecked = currentPaths.includes(dir + "/") || currentPaths.includes(dir);
+                              return (
+                                <label key={dir} className="flex items-center gap-2 text-xs text-black cursor-pointer bg-white border border-neutral-200 rounded px-2 py-1.5 hover:bg-neutral-50">
+                                  <input 
+                                    type="checkbox" 
+                                    className="rounded border-neutral-300 text-blue-600 focus:ring-blue-500"
+                                    checked={isChecked}
+                                    onChange={(e) => {
+                                      const checked = e.target.checked;
+                                      const dirSlash = dir + "/";
+                                      let newPaths = [...currentPaths];
+                                      if (checked) {
+                                        if (!newPaths.includes(dirSlash) && !newPaths.includes(dir)) {
+                                          newPaths.push(dirSlash);
+                                        }
+                                      } else {
+                                        newPaths = newPaths.filter(p => p !== dirSlash && p !== dir);
+                                      }
+                                      setRepoPaths(prev => ({ ...prev, [repo.id]: newPaths.join(", ") }));
+                                    }}
+                                  />
+                                  <span className="truncate">{dir}/</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <label className="block text-[10px] font-bold text-neutral-500 uppercase mb-1">Custom Folders (comma separated)</label>
                         <input
                           type="text"
                           value={repoPaths[repo.id] !== undefined ? repoPaths[repo.id] : "policies/"}
                           onChange={(e) => setRepoPaths(prev => ({ ...prev, [repo.id]: e.target.value }))}
                           className="w-full rounded border border-neutral-300 bg-white px-2 py-1.5 text-sm text-black focus:border-blue-500 focus:outline-none shadow-sm"
                           placeholder="policies/, docs/compliance/"
-                          onClick={(e) => e.stopPropagation()}
                         />
                       </div>
                     )}
