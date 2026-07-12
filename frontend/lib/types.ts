@@ -66,6 +66,7 @@ export interface Conflict {
     a: { policy_id: string; section: string | null; quote: string };
     b: { policy_id: string; section: string | null; quote: string };
     trigger_terms: string[];
+  };
   confidence: number;
   confidence_factors: string[];
   scope_analysis: string | null;
