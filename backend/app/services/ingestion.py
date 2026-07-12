@@ -13,6 +13,7 @@ import re
 from sqlalchemy.orm import Session
 
 from app.ai_engine import parse_policy
+from app.ai_engine.parser import _coerce_date
 from app.connectors.base import RawPolicy
 from app.core.ids import new_id
 from app.core.logging import get_logger
@@ -49,6 +50,17 @@ def ingest_raw_policy(db: Session, raw: RawPolicy) -> Policy:
                           fallback_title=raw.name,
                           source=raw.meta.get("source", "upload"))
     content_hash = _hash(raw.text)
+
+    # If the parser didn't extract a last_reviewed from the policy text,
+    # fall back to the last_modified date from the connector (e.g. GitHub
+    # last commit date). This enables staleness detection for policies that
+    # don't embed a "Last Reviewed" header.
+    if not parsed.last_reviewed and raw.meta.get("last_modified"):
+        # The GitHub API returns ISO 8601 strings e.g. "2023-01-01T12:00:00Z"
+        # We can just extract the date part (YYYY-MM-DD) for _coerce_date
+        date_str = str(raw.meta["last_modified"]).split("T")[0]
+        parsed.last_reviewed = _coerce_date(date_str)
+
     existing = db.get(Policy, parsed.id)
 
     if existing is None:

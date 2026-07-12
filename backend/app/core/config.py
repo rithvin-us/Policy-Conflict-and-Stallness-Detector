@@ -48,8 +48,8 @@ class Settings:
     REDIS_URL = os.getenv("REDIS_URL", "")
     USE_CELERY = os.getenv("USE_CELERY", "0") == "1"
 
-    # Seed corpus loaded on first boot so the dashboard is never empty.
-    SEED_ON_STARTUP = os.getenv("SEED_ON_STARTUP", "1") == "1"
+    # Seed corpus disabled by default — dashboard starts empty. Set to "1" for local dev demos.
+    SEED_ON_STARTUP = os.getenv("SEED_ON_STARTUP", "0") == "1"
     SEED_POLICY_DIR = os.getenv(
         "SEED_POLICY_DIR", str(REPO_ROOT / "sample_data" / "policies")
     )

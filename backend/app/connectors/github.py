@@ -89,8 +89,25 @@ class GitHubConnector(BaseConnector):
         data = r.json()
         text = base64.b64decode(data.get("content", "")).decode("utf-8", "replace")
         name = ref.get("name") or ref["path"].rsplit("/", 1)[-1].rsplit(".", 1)[0]
+
+        # Fetch the last commit date for this file (used for staleness detection).
+        last_modified = None
+        try:
+            commits_url = f"{_API}/repos/{repo}/commits"
+            cr = httpx.get(commits_url, headers=self._headers(),
+                           params={"sha": gitref, "path": ref["path"], "per_page": 1},
+                           timeout=10)
+            if cr.status_code == 200:
+                commits = cr.json()
+                if commits:
+                    commit_info = commits[0].get("commit", {})
+                    last_modified = (commit_info.get("committer") or {}).get("date")
+        except httpx.HTTPError:
+            pass  # best-effort; staleness still works without it
+
         return RawPolicy(path=ref["path"], name=name, text=text,
-                         meta={"source": f"github:{repo}", "ref": gitref})
+                         meta={"source": f"github:{repo}", "ref": gitref,
+                               "last_modified": last_modified})
 
     def is_policy_path(self, path: str) -> bool:
         """True when ``path`` is a policy file inside the connector's tree."""
