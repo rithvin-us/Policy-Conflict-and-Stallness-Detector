@@ -220,3 +220,26 @@ def webhook_events(status: str | None = None,
         query = query.filter(WebhookEvent.status == status.upper())
     rows = query.order_by(WebhookEvent.received_at.desc()).limit(100).all()
     return {"items": [webhook_to_dict(w) for w in rows], "total": len(rows)}
+
+
+@router.delete("/connectors/{connector_id}", status_code=204)
+def delete_connector(connector_id: str, db: Session = Depends(get_db)):
+    connector = db.get(Connector, connector_id)
+    if not connector:
+        raise HTTPException(404, f"Connector {connector_id} not found")
+    db.delete(connector)
+    db.commit()
+    return None
+
+@router.patch("/connectors/{connector_id}")
+def update_connector(connector_id: str, body: dict, db: Session = Depends(get_db)) -> dict:
+    connector = db.get(Connector, connector_id)
+    if not connector:
+        raise HTTPException(404, f"Connector {connector_id} not found")
+    if "name" in body:
+        connector.name = body["name"]
+    if "config" in body:
+        connector.config = body["config"]
+    db.commit()
+    return connector_to_dict(connector)
+

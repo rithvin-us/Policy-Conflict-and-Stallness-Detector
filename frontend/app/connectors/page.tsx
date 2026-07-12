@@ -34,18 +34,36 @@ export default function ConnectorsPage() {
     }
   }
 
-  function handleEdit(id: string) {
-    alert("Edit mode activated. (Mocked for demo)");
+  async function handleEdit(c: any) {
+    if (c.type !== "GITHUB") {
+      alert("Only GITHUB connectors can be edited in this demo.");
+      return;
+    }
+    const newPath = prompt("Edit repository path (e.g. 'policies/'):", (c.config?.path as string) || "");
+    if (newPath !== null) {
+      setBusy(c.id);
+      try {
+        await api.updateConnector(c.id, { config: { ...c.config, path: newPath } });
+        connectors.reload();
+      } catch (err: any) {
+        alert("Failed to edit: " + err.message);
+      } finally {
+        setBusy(null);
+      }
+    }
   }
 
-  function handleDelete(id: string) {
-    if (confirm("Are you sure you want to delete this connector?")) {
-      setDeletedIds(prev => {
-        const next = new Set(prev);
-        next.add(id);
-        return next;
-      });
-      alert("Connector deleted successfully. (Mocked for demo)");
+  async function handleDelete(id: string) {
+    if (confirm("Are you sure you want to delete this connector? This action cannot be undone.")) {
+      setBusy(id);
+      try {
+        await api.deleteConnector(id);
+        connectors.reload();
+      } catch (err: any) {
+        alert("Failed to delete: " + err.message);
+      } finally {
+        setBusy(null);
+      }
     }
   }
 
@@ -95,7 +113,7 @@ export default function ConnectorsPage() {
               <div className="mt-4 flex items-center justify-between border-t border-neutral-100 pt-4">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleEdit(c.id)}
+                    onClick={() => handleEdit(c)}
                     className="rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs text-neutral-600 font-bold transition hover:bg-neutral-100 hover:text-black"
                   >
                     Edit

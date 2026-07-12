@@ -72,6 +72,10 @@ export const api = {
   connectors: () => req<List<Connector>>("/connectors"),
   createConnector: (body: Record<string, unknown>) =>
     req<Connector>("/connectors", { method: "POST", body: JSON.stringify(body) }),
+  deleteConnector: (id: string) =>
+    req<void>(`/connectors/${id}`, { method: "DELETE" }),
+  updateConnector: (id: string, body: Record<string, unknown>) =>
+    req<Connector>(`/connectors/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   syncConnector: (id: string) =>
     req<Record<string, unknown>>(`/connectors/${id}/sync`, { method: "POST" }),
   webhookEvents: () => req<List<WebhookEvent>>("/webhooks/events"),
