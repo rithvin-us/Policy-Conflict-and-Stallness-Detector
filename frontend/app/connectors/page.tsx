@@ -109,9 +109,9 @@ export default function ConnectorsPage() {
                 </div>
                 
                 <div className="flex gap-2">
-                  {c.type === "GITHUB" && c.config?.repo && (
+                  {c.type === "GITHUB" && typeof c.config?.repo === "string" && (
                     <a
-                      href={`https://github.com/${c.config.repo}/tree/${c.config.branch || 'main'}/${c.config.path || ''}`}
+                      href={`https://github.com/${c.config.repo as string}/tree/${(c.config.branch as string) || 'main'}/${(c.config.path as string) || ''}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="rounded-lg border border-neutral-200 bg-white px-3 py-1.5 text-xs text-neutral-700 font-bold transition hover:bg-neutral-50 flex items-center gap-1.5 shadow-sm"
