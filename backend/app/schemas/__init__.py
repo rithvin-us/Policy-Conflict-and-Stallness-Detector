@@ -84,6 +84,7 @@ def obligation_to_dict(o: "models.Obligation") -> dict[str, Any]:
         "policy_id": o.policy_id,
         "section": o.section,
         "topic": o.topic,
+        "topics": o.topics or [o.topic],
         "action": o.action,
         "scope": o.scope,
         "strength": o.strength,
@@ -106,6 +107,7 @@ def conflict_to_dict(c: "models.Conflict") -> dict[str, Any]:
         "explanation": c.explanation,
         "evidence": c.evidence,
         "confidence": c.confidence,
+        "confidence_factors": c.confidence_factors or [],
         "scope_analysis": c.scope_analysis,
         "resolution_suggestion": c.resolution_suggestion,
         "compliance_impact": c.compliance_impact or [],
@@ -122,6 +124,7 @@ def staleness_to_dict(s: "models.StalenessFinding") -> dict[str, Any]:
         "evidence": s.evidence or [],
         "recommendation": s.recommendation,
         "age_months": s.age_months,
+        "confidence_factors": s.confidence_factors or [],
         "risk": s.risk,
     }
 
@@ -210,6 +213,7 @@ def policy_version_to_dict(v: "models.PolicyVersion") -> dict[str, Any]:
         "id": v.id,
         "policy_id": v.policy_id,
         "version": v.version,
+        "raw_text": v.raw_text,
         "content_hash": v.content_hash,
         "created_at": _iso(v.created_at),
         "size": len(v.raw_text or ""),

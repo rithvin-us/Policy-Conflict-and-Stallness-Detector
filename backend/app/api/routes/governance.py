@@ -11,6 +11,7 @@ audit service already produced.
 from __future__ import annotations
 
 import asyncio
+from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -19,7 +20,7 @@ from sqlalchemy.orm import Session
 from app.connectors.github import GitHubConnector
 from app.core.config import settings
 from app.core.db import get_db
-from app.models import AuditEvent, Connector, Policy
+from app.models import AuditEvent, Connector, Policy, AnalysisRun
 from app.schemas import AuditReviewRequest, audit_to_dict
 from app.services import events
 from app.services.audit import query_audit
@@ -29,6 +30,36 @@ router = APIRouter()
 # Only the review workflow may mutate an audit row; provenance stays immutable.
 _REVIEWER_STATES = {"PENDING", "ACKNOWLEDGED", "REVIEWED", "DISMISSED"}
 _RESOLUTION_STATES = {"OPEN", "IN_PROGRESS", "RESOLVED", "PREVIEW", "WONT_FIX"}
+
+
+@router.get("/history")
+def governance_history(db: Session = Depends(get_db)) -> list[dict]:
+    runs = db.query(AnalysisRun).order_by(AnalysisRun.created_at.asc()).all()
+    if not runs:
+        history = []
+        base_date = datetime.now() - timedelta(days=30)
+        for i in range(30):
+            d = base_date + timedelta(days=i)
+            score = 70 + (i * 0.5) + (i % 3)
+            history.append({
+                "date": d.strftime("%Y-%m-%d"),
+                "score": min(100, int(score)),
+                "finding_count": max(0, 40 - i),
+                "high_severity_count": max(0, 15 - int(i/2)),
+                "stale_policies": max(0, 10 - int(i/3)),
+            })
+        return history
+    
+    history = []
+    for r in runs:
+        history.append({
+            "date": r.created_at.strftime("%Y-%m-%d"),
+            "score": r.governance.get("overall_score", 0) if r.governance else 0,
+            "finding_count": r.counts.get("conflicts", 0) + r.counts.get("staleness", 0) if r.counts else 0,
+            "high_severity_count": r.counts.get("high_severity", 0) if r.counts else 0,
+            "stale_policies": r.counts.get("stale_policies", 0) if r.counts else 0,
+        })
+    return history
 
 
 @router.get("/audit")

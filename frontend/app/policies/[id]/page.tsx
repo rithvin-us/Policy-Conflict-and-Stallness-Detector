@@ -7,13 +7,17 @@ import { Panel, SeverityChip, TypeTag, scoreColor } from "@/components/ui";
 
 export default function PolicyDetailPage({ params }: { params: { id: string } }) {
   const { data, error, loading } = useApi(() => api.policy(params.id), [params.id]);
+  const blast = useApi(() => api.blastRadius(params.id), [params.id]);
 
   if (loading) return <div className="text-sm text-slate-500">Loading…</div>;
   if (error || !data) return <div className="text-sm text-severity-high">Failed to load policy.</div>;
 
   return (
     <div className="space-y-6">
-      <Link href="/policies" className="text-sm text-accent hover:underline">← Policy library</Link>
+      <div className="flex items-center justify-between">
+        <Link href="/policies" className="text-sm text-accent hover:underline">← Policy library</Link>
+        <Link href={`/policies/${params.id}/versions`} className="text-sm text-accent hover:underline">Version History →</Link>
+      </div>
 
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
@@ -94,6 +98,36 @@ export default function PolicyDetailPage({ params }: { params: { id: string } })
               )}
             </div>
           </Panel>
+
+          {blast.data && (
+            <Panel title="Blast Radius">
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Potential Findings Introduced:</span>
+                  <span className="mono">{blast.data.potential_new_findings}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-slate-400">Est. Governance Impact:</span>
+                  <span className="mono" style={{ color: scoreColor(100 + blast.data.estimated_governance_impact * 5) }}>
+                    {blast.data.estimated_governance_impact}
+                  </span>
+                </div>
+                {blast.data.affected_policies?.length > 0 && (
+                  <div className="mt-4">
+                    <div className="stat-label mb-2">Affected Policies</div>
+                    <div className="space-y-2">
+                      {blast.data.affected_policies.map((ap: any) => (
+                        <Link key={ap.id} href={`/policies/${ap.id}`} className="flex justify-between text-sm hover:bg-white/[0.03] p-1 rounded">
+                          <span className="text-accent">{ap.title}</span>
+                          <span className="mono text-xs">{ap.health_score}</span>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </Panel>
+          )}
         </div>
       </div>
     </div>

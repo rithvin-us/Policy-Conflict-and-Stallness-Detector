@@ -26,7 +26,7 @@ def analyze_corpus(policies: list[PolicyInput],
     for p in policies:
         obligations.extend(extract_obligations(p))
 
-    conflicts = detect_conflicts(obligations)
+    conflicts = detect_conflicts(obligations, policies)
 
     staleness = []
     for p in policies:

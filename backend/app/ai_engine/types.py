@@ -20,6 +20,7 @@ PASSWORD = "PASSWORD"
 ENCRYPTION = "ENCRYPTION"
 ACCESS_CONTROL = "ACCESS_CONTROL"
 AUTHENTICATION = "AUTHENTICATION"
+IDENTITY = "IDENTITY"
 DATA_RETENTION = "DATA_RETENTION"
 DATA_CLASSIFICATION = "DATA_CLASSIFICATION"
 NETWORK = "NETWORK"
@@ -45,6 +46,7 @@ STRENGTH = "STRENGTH"
 PARAMETER = "PARAMETER"
 PARTIAL_REDUNDANCY = "PARTIAL_REDUNDANCY"
 REDUNDANCY = "REDUNDANCY"
+PRECEDENCE = "PRECEDENCE"
 
 # Severity
 HIGH = "HIGH"
@@ -93,6 +95,7 @@ class Obligation:
     policy_id: str
     section: Optional[str]
     topic: str
+    topics: list[str]
     action: str
     scope: Scope
     strength: str
@@ -129,6 +132,7 @@ class Conflict:
     explanation: str
     evidence: Evidence
     confidence: float
+    confidence_factors: list[str]
     scope_analysis: Optional[str]
     resolution_suggestion: str
     compliance_impact: list[str]
@@ -148,6 +152,7 @@ class StalenessFinding:
     evidence: list[str]
     recommendation: str
     age_months: Optional[int]
+    confidence_factors: list[str] = field(default_factory=list)
 
     def to_dict(self) -> dict[str, Any]:
         return asdict(self)

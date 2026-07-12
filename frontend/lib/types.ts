@@ -66,8 +66,8 @@ export interface Conflict {
     a: { policy_id: string; section: string | null; quote: string };
     b: { policy_id: string; section: string | null; quote: string };
     trigger_terms: string[];
-  };
   confidence: number;
+  confidence_factors: string[];
   scope_analysis: string | null;
   resolution_suggestion: string;
   compliance_impact: string[];
@@ -91,6 +91,7 @@ export interface ExplanationPayload {
   likely_resolution: string;
   compliance_refs: string[];
   confidence: number;
+  confidence_factors: string[];
 }
 
 export interface StalenessFinding {
@@ -199,6 +200,7 @@ export interface PolicyVersion {
   id: string;
   policy_id: string;
   version: string;
+  raw_text?: string;
   content_hash: string;
   created_at: string | null;
   size: number;

@@ -71,6 +71,43 @@ def policy_versions(policy_id: str, db: Session = Depends(get_db)) -> dict:
     return {"items": [policy_version_to_dict(v) for v in rows], "total": len(rows)}
 
 
+@router.get("/policies/{policy_id}/blast-radius")
+def policy_blast_radius(policy_id: str, db: Session = Depends(get_db)) -> dict:
+    if not db.get(Policy, policy_id):
+        raise HTTPException(404, f"Policy {policy_id} not found")
+    
+    conflicts = db.query(Conflict).filter(
+        (Conflict.policy_a_id == policy_id) | (Conflict.policy_b_id == policy_id)).all()
+    
+    related_policy_ids = set()
+    potential_conflicts = 0
+    impact = 0.0
+
+    for c in conflicts:
+        related_policy_ids.add(c.policy_a_id)
+        related_policy_ids.add(c.policy_b_id)
+        if c.severity == "HIGH":
+            potential_conflicts += 1
+            impact -= 2.0
+        elif c.severity == "MEDIUM":
+            impact -= 1.0
+            
+    related_policy_ids.discard(policy_id)
+    
+    affected_policies = []
+    if related_policy_ids:
+        related = db.query(Policy).filter(Policy.id.in_(related_policy_ids)).all()
+        for r in related:
+            affected_policies.append({"id": r.id, "title": r.title, "health_score": r.health_score})
+            
+    return {
+        "root_policy_id": policy_id,
+        "affected_policies": affected_policies,
+        "potential_new_findings": potential_conflicts,
+        "estimated_governance_impact": round(impact, 2)
+    }
+
+
 @router.post("/policies/upload", status_code=201)
 def upload_policy(body: PolicyUploadRequest, db: Session = Depends(get_db)) -> dict:
     header = (f"--- {body.title} (v{body.version}) ---\n"

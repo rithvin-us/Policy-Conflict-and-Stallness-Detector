@@ -9,6 +9,7 @@ from app.core.db import get_db
 from app.explainability import explain_conflict
 from app.models import Conflict, Policy, StalenessFinding
 from app.schemas import conflict_to_dict, staleness_to_dict
+from app.services.llm import suggest_resolution
 
 router = APIRouter()
 
@@ -61,6 +62,19 @@ def get_conflict(conflict_id: str, db: Session = Depends(get_db)) -> dict:
     data["policy_a_title"] = titles.get(c.policy_a_id)
     data["policy_b_title"] = titles.get(c.policy_b_id)
     return data
+
+
+@router.post("/conflicts/{conflict_id}/suggest-resolution")
+def suggest_conflict_resolution(conflict_id: str, db: Session = Depends(get_db)) -> dict:
+    c = db.get(Conflict, conflict_id)
+    if not c:
+        raise HTTPException(404, f"Conflict {conflict_id} not found")
+    
+    suggestion = suggest_resolution(conflict_to_dict(c))
+    c.resolution_suggestion = suggestion
+    db.commit()
+    
+    return {"suggestion": suggestion}
 
 
 @router.get("/redundancies")

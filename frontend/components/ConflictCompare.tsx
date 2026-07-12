@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "framer-motion";
 import type { Conflict, ExplanationPayload } from "@/lib/types";
+import { api } from "@/lib/api";
 import { Panel, SeverityChip, TypeTag } from "./ui";
 
 // Renders a quote with trigger terms highlighted, using the [start,end] spans
@@ -52,6 +54,21 @@ function PolicySide({
 }
 
 export function ConflictCompare({ conflict }: { conflict: Conflict }) {
+  const [aiSuggestion, setAiSuggestion] = useState<string | null>(null);
+  const [loadingAi, setLoadingAi] = useState(false);
+
+  const getSuggestion = async () => {
+    setLoadingAi(true);
+    try {
+      const res = await api.suggestResolution(conflict.id);
+      setAiSuggestion(res.suggestion);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoadingAi(false);
+    }
+  };
+
   const ep: ExplanationPayload | undefined = conflict.explanation_payload;
   const spanA = ep?.spans?.[0];
   const spanB = ep?.spans?.[1];
@@ -107,8 +124,23 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
         )}
         <div className="mt-4 grid gap-4 md:grid-cols-2">
           <div>
-            <div className="stat-label mb-1">Likely resolution</div>
-            <p className="text-sm text-slate-300">{conflict.resolution_suggestion}</p>
+            <div className="stat-label mb-1 flex items-center justify-between">
+              <span>Likely resolution</span>
+              <button 
+                onClick={getSuggestion} 
+                disabled={loadingAi}
+                className="text-accent text-[0.65rem] hover:underline bg-accent/10 px-1.5 py-0.5 rounded transition disabled:opacity-50"
+              >
+                {loadingAi ? "Thinking..." : "✨ Ask AI"}
+              </button>
+            </div>
+            {aiSuggestion ? (
+              <div className="text-sm text-accent bg-accent/5 p-2 rounded border border-accent/20">
+                {aiSuggestion}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-300">{conflict.resolution_suggestion}</p>
+            )}
           </div>
           <div>
             <div className="stat-label mb-1">Compliance impact</div>
@@ -131,6 +163,18 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
                 </span>
               ))}
             </div>
+          </div>
+        ) : null}
+        {ep?.confidence_factors?.length ? (
+          <div className="mt-4">
+            <div className="stat-label mb-1">Confidence Breakdown</div>
+            <ul className="text-sm text-slate-300 space-y-1">
+              {ep.confidence_factors.map((factor) => (
+                <li key={factor} className="flex items-center gap-2">
+                  <span className="text-severity-low">✔</span> {factor}
+                </li>
+              ))}
+            </ul>
           </div>
         ) : null}
       </Panel>

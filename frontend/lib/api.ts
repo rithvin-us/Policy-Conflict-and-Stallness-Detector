@@ -43,6 +43,7 @@ type List<T> = { items: T[]; total: number };
 
 export const api = {
   overview: () => req<GovernanceScore>("/dashboard/overview"),
+  history: () => req<any[]>("/history"),
   timeline: (limit = 30) => req<{ items: TimelineEvent[] }>(`/timeline?limit=${limit}`),
   meta: () => req<Record<string, string[]>>("/meta"),
 
@@ -56,6 +57,7 @@ export const api = {
 
   conflicts: (q = "") => req<List<Conflict>>(`/conflicts${q}`),
   conflict: (id: string) => req<Conflict>(`/conflicts/${id}`),
+  suggestResolution: (id: string) => req<{suggestion: string}>(`/conflicts/${id}/suggest-resolution`, { method: "POST" }),
   redundancies: () => req<List<Conflict>>("/redundancies"),
   staleness: () => req<List<StalenessFinding>>("/staleness"),
   reviewQueue: () => req<List<ReviewItem>>("/review-queue"),
@@ -84,6 +86,8 @@ export const api = {
     req<AuditEvent>(`/audit/${id}`, { method: "PATCH", body: JSON.stringify(body) }),
   policyVersions: (id: string) =>
     req<List<PolicyVersion>>(`/policies/${id}/versions`),
+  blastRadius: (id: string) =>
+    req<any>(`/policies/${id}/blast-radius`),
   eventStreamUrl: () => "/api/v1/events/stream",
 
   runAnalysis: () =>

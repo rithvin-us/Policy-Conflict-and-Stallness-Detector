@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
 import { GovernanceGauge } from "@/components/GovernanceGauge";
-import { SeverityBars, TrendSpark } from "@/components/charts";
+import { SeverityBars, GovernanceHistoryChart } from "@/components/charts";
 import { Panel, SeverityChip, scoreColor } from "@/components/ui";
 
 export default function OverviewPage() {
@@ -13,6 +13,7 @@ export default function OverviewPage() {
   const queue = useApi(() => api.reviewQueue(), []);
   const tl = useApi(() => api.timeline(12), []);
   const conflicts = useApi(() => api.conflicts(), []);
+  const hist = useApi(() => api.history(), []);
 
   const g = ov.data;
   const c = g?.counts;
@@ -46,8 +47,8 @@ export default function OverviewPage() {
             </div>
           </div>
           <div className="mt-4 border-t border-white/5 pt-3">
-            <div className="stat-label mb-1">30-day trend</div>
-            {g?.trend?.length ? <TrendSpark data={g.trend} /> : <Empty />}
+            <div className="stat-label mb-1">30-day Trend</div>
+            {hist.data?.length ? <GovernanceHistoryChart data={hist.data} /> : <Empty />}
           </div>
         </Panel>
 

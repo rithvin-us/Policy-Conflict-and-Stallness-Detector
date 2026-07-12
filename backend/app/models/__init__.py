@@ -66,6 +66,7 @@ class Obligation(Base):
     policy_id: Mapped[str] = mapped_column(ForeignKey("policies.id"), index=True)
     section: Mapped[str | None] = mapped_column(String, nullable=True)
     topic: Mapped[str] = mapped_column(String, index=True)
+    topics: Mapped[list] = mapped_column(JSON, default=list)
     action: Mapped[str] = mapped_column(String)
     scope: Mapped[dict] = mapped_column(JSON, default=dict)
     strength: Mapped[str] = mapped_column(String)
@@ -90,6 +91,7 @@ class Conflict(Base):
     explanation: Mapped[str] = mapped_column(Text)
     evidence: Mapped[dict] = mapped_column(JSON, default=dict)
     confidence: Mapped[float] = mapped_column(Float, default=0.5)
+    confidence_factors: Mapped[list] = mapped_column(JSON, default=list)
     scope_analysis: Mapped[str | None] = mapped_column(Text, nullable=True)
     resolution_suggestion: Mapped[str] = mapped_column(Text, default="")
     compliance_impact: Mapped[list] = mapped_column(JSON, default=list)
@@ -107,6 +109,7 @@ class StalenessFinding(Base):
     evidence: Mapped[list] = mapped_column(JSON, default=list)
     recommendation: Mapped[str] = mapped_column(Text, default="")
     age_months: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    confidence_factors: Mapped[list] = mapped_column(JSON, default=list)
     risk: Mapped[float] = mapped_column(Float, default=0.0)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=_utcnow)
 

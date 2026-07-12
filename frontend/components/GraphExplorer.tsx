@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState, useEffect } from "react";
 import ReactFlow, {
   Background,
   Controls,
@@ -11,6 +11,7 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import type { GraphPayload } from "@/lib/types";
+import { api } from "@/lib/api";
 import { scoreColor, severityColor } from "./ui";
 
 const RELATION_COLOR: Record<string, string> = {
@@ -68,6 +69,22 @@ function ObligationNode({ data }: { data: any }) {
 const nodeTypes = { policyNode: PolicyNode, obligationNode: ObligationNode };
 
 export function GraphExplorer({ payload }: { payload: GraphPayload }) {
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [policyData, setPolicyData] = useState<any>(null);
+  const [blastData, setBlastData] = useState<any>(null);
+
+  useEffect(() => {
+    if (selectedNode?.type === "policyNode") {
+      setPolicyData(null);
+      setBlastData(null);
+      api.policy(selectedNode.id).then(setPolicyData).catch(console.error);
+      api.blastRadius(selectedNode.id).then(setBlastData).catch(console.error);
+    } else {
+      setPolicyData(null);
+      setBlastData(null);
+    }
+  }, [selectedNode]);
+
   const nodes: Node[] = useMemo(
     () => payload.nodes.map((n) => ({ id: n.id, type: n.type, position: n.position, data: n.data })),
     [payload],
@@ -96,18 +113,75 @@ export function GraphExplorer({ payload }: { payload: GraphPayload }) {
   );
 
   return (
-    <div className="h-[70vh] w-full overflow-hidden rounded-xl border border-white/5">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        nodeTypes={nodeTypes}
-        fitView
-        minZoom={0.2}
-        proOptions={{ hideAttribution: true }}
-      >
-        <Background color="#1c2540" gap={22} />
-        <Controls showInteractive={false} />
-      </ReactFlow>
+    <div className="flex gap-4 h-[70vh] w-full">
+      <div className="flex-1 overflow-hidden rounded-xl border border-white/5">
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          nodeTypes={nodeTypes}
+          fitView
+          minZoom={0.2}
+          proOptions={{ hideAttribution: true }}
+          onNodeClick={(_, node) => setSelectedNode(node)}
+          onPaneClick={() => setSelectedNode(null)}
+        >
+          <Background color="#1c2540" gap={22} />
+          <Controls showInteractive={false} />
+        </ReactFlow>
+      </div>
+
+      {selectedNode && (
+        <div className="w-80 shrink-0 overflow-y-auto rounded-xl border border-white/5 bg-ink-850/95 p-4 shadow-panel">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="font-semibold text-slate-100">Node Details</h3>
+            <button onClick={() => setSelectedNode(null)} className="text-slate-500 hover:text-slate-300">✕</button>
+          </div>
+          
+          {selectedNode.type === "policyNode" ? (
+            policyData ? (
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs text-slate-500">Title</div>
+                  <div className="text-sm text-slate-200">{policyData.title}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-slate-500">Health Score</div>
+                  <div className="text-sm font-mono" style={{ color: scoreColor(policyData.health_score) }}>{policyData.health_score}</div>
+                </div>
+                {blastData && (
+                  <div className="rounded border border-white/5 bg-white/5 p-3 mt-4 space-y-2">
+                    <div className="font-semibold text-sm text-slate-300">Blast Radius</div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Potential new conflicts:</span>
+                      <span className="mono">{blastData.potential_new_findings}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-slate-400">Governance impact:</span>
+                      <span className="mono">{blastData.estimated_governance_impact}</span>
+                    </div>
+                    <div className="text-xs text-slate-400 mt-2">Affected Policies: {blastData.affected_policies?.length || 0}</div>
+                  </div>
+                )}
+              </div>
+            ) : <div className="text-sm text-slate-500">Loading details...</div>
+          ) : (
+            <div className="space-y-4">
+              <div>
+                <div className="text-xs text-slate-500">Action</div>
+                <div className="text-sm text-slate-200">{selectedNode.data.action}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500">Topic</div>
+                <div className="text-sm text-slate-200">{selectedNode.data.topic}</div>
+              </div>
+              <div>
+                <div className="text-xs text-slate-500">Text</div>
+                <div className="text-xs text-slate-400 mt-1">{selectedNode.data.label}</div>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }

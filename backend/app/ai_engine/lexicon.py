@@ -62,6 +62,7 @@ TOPIC_KEYWORDS: dict[str, list[str]] = {
     T.PASSWORD: ["password", "passphrase", "credential", "credentials"],
     T.AUTHENTICATION: ["mfa", "multi-factor", "multifactor", "2fa",
                        "two-factor", "authentication", "api key", "api keys"],
+    T.IDENTITY: ["identity", "iam", "account", "accounts", "user", "users", "privileged"],
     T.ENCRYPTION: ["encrypt", "encryption", "encrypted", "cipher", "tls",
                    "ssl", "cryptograph", "hash", "hashed", "at rest",
                    "in transit"],
@@ -134,8 +135,13 @@ SCOPE_PATTERNS: list[tuple[str, str, str]] = [
 DURATION_RE = re.compile(
     r"(\d+)\s*(day|days|month|months|year|years|hour|hours)\b", re.I
 )
-MIN_LENGTH_RE = re.compile(r"at least\s+(\d+)\s+characters", re.I)
-COUNT_RE = re.compile(r"previous\s+(\d+)", re.I)
+MIN_LENGTH_RE = re.compile(r"(?:at least|minimum of|length)\s+(\d+)\s+characters?", re.I)
+COUNT_RE = re.compile(r"(?:previous|history)\s+(\d+)", re.I)
+ALGO_RE = re.compile(r"\b(AES-128|AES-256|RSA-2048|RSA-4096|SHA-1|SHA-256)\b", re.I)
+TLS_RE = re.compile(r"\b(TLS\s*1\.[0-3])\b", re.I)
+TIMEOUT_RE = re.compile(r"(?:timeout|expires?|idle).{0,20}?(\d+)\s*(minute|minutes|hour|hours)\b", re.I)
+PORT_RE = re.compile(r"\bport\s+(\d+)\b", re.I)
+KEY_SIZE_RE = re.compile(r"\b(\d{3,4})[- ]?bit\b", re.I)
 
 DURATION_TO_DAYS = {
     "hour": 1 / 24, "hours": 1 / 24,
@@ -177,6 +183,7 @@ REVIEW_OVERDUE_MONTHS = 18
 COMPLIANCE_BY_TOPIC: dict[str, list[str]] = {
     T.PASSWORD: ["ISO 27001 A.5.1", "NIST IA-5", "NIST 800-63B"],
     T.AUTHENTICATION: ["ISO 27001 A.5.1", "NIST IA-2"],
+    T.IDENTITY: ["ISO 27001 A.5.1", "NIST AC-2"],
     T.ENCRYPTION: ["ISO 27001 A.8.24", "NIST SC-13"],
     T.DATA_RETENTION: ["GDPR Art.5", "GDPR Art.17", "SOX", "ISO 27001 A.5.34"],
     T.DATA_CLASSIFICATION: ["ISO 27001 A.5.12", "NIST RA-2"],

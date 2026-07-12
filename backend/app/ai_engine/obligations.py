@@ -48,12 +48,15 @@ def _detect_polarity(sentence_lower: str) -> str:
     return T.AFFIRM
 
 
-def _detect_topic(sentence_lower: str) -> str:
+def _detect_topics(sentence_lower: str) -> list[str]:
+    found = []
     for topic, keywords in L.TOPIC_KEYWORDS.items():
         for kw in keywords:
             if re.search(rf"(?<!\w){re.escape(kw)}", sentence_lower):
-                return topic
-    return T.GENERAL
+                if topic not in found:
+                    found.append(topic)
+                break  # Go to next topic
+    return found if found else [T.GENERAL]
 
 
 def _detect_action(sentence_lower: str) -> str:
@@ -105,6 +108,25 @@ def _extract_parameters(sentence: str) -> dict[str, Any]:
     cm = L.COUNT_RE.search(sentence)
     if cm:
         params["history_count"] = int(cm.group(1))
+    algo = L.ALGO_RE.search(sentence)
+    if algo:
+        params["algorithm"] = algo.group(1).upper()
+    tls = L.TLS_RE.search(sentence)
+    if tls:
+        params["tls_version"] = tls.group(1).upper().replace(" ", "")
+    timeout = L.TIMEOUT_RE.search(sentence)
+    if timeout:
+        qty = int(timeout.group(1))
+        unit = timeout.group(2).lower()
+        params["timeout_value"] = qty
+        params["timeout_unit"] = unit
+        params["timeout_minutes"] = round(qty * (60 if "hour" in unit else 1))
+    port = L.PORT_RE.search(sentence)
+    if port:
+        params["port"] = int(port.group(1))
+    keysize = L.KEY_SIZE_RE.search(sentence)
+    if keysize:
+        params["key_size"] = int(keysize.group(1))
     return params
 
 
@@ -131,20 +153,22 @@ def extract_obligations(policy: PolicyInput) -> list[Obligation]:
         if strength is None:
             continue  # no modal verb → not an obligation
         seq += 1
-        topic = _detect_topic(lower)
+        topics = _detect_topics(lower)
+        action = _detect_action(lower)
         obligations.append(
             Obligation(
                 id=f"obl_{policy.id}_{seq}",
                 policy_id=policy.id,
                 section=section,
-                topic=topic,
-                action=_detect_action(lower),
+                topic=topics[0],
+                topics=topics,
+                action=action,
                 scope=_detect_scope(lower),
                 strength=strength,
                 polarity=_detect_polarity(lower),
                 parameters=_extract_parameters(sentence),
                 evidence_text=sentence,
-                confidence=_confidence(strength, topic, _detect_action(lower)),
+                confidence=_confidence(strength, topics[0], action),
             )
         )
     return obligations

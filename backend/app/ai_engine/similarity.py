@@ -10,8 +10,10 @@ similarity score, never suppress a rule-based conflict, preserving precision.
 from __future__ import annotations
 
 import difflib
+import math
 import os
 import re
+from collections import Counter
 from functools import lru_cache
 
 _TOKEN_RE = re.compile(r"[a-z0-9]+")
@@ -36,10 +38,44 @@ def jaccard(a: str, b: str) -> float:
 def sequence_ratio(a: str, b: str) -> float:
     return difflib.SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
+def keyword_overlap(a: str, b: str) -> float:
+    ta, tb = _tokens(a), _tokens(b)
+    if not ta or not tb:
+        return 0.0
+    return len(ta & tb) / min(len(ta), len(tb))
+
+def tfidf_cosine(a: str, b: str) -> float:
+    ta, tb = list(_TOKEN_RE.findall(a.lower())), list(_TOKEN_RE.findall(b.lower()))
+    ta = [t for t in ta if t not in _STOP and len(t) > 2]
+    tb = [t for t in tb if t not in _STOP and len(t) > 2]
+    if not ta or not tb: return 0.0
+    
+    ca, cb = Counter(ta), Counter(tb)
+    vocab = set(ca.keys()) | set(cb.keys())
+    
+    vec_a, vec_b = [], []
+    for w in vocab:
+        df = (1 if w in ca else 0) + (1 if w in cb else 0)
+        idf = math.log(3 / (1 + df)) + 1 # smoothed idf
+        tf_a = ca[w] / len(ta)
+        tf_b = cb[w] / len(tb)
+        vec_a.append(tf_a * idf)
+        vec_b.append(tf_b * idf)
+        
+    dot = sum(va * vb for va, vb in zip(vec_a, vec_b))
+    norm_a = math.sqrt(sum(va * va for va in vec_a))
+    norm_b = math.sqrt(sum(vb * vb for vb in vec_b))
+    if norm_a == 0 or norm_b == 0: return 0.0
+    return dot / (norm_a * norm_b)
+
 
 def lexical_similarity(a: str, b: str) -> float:
-    """Blend token overlap and character-sequence similarity (0..1)."""
-    return round(0.65 * jaccard(a, b) + 0.35 * sequence_ratio(a, b), 4)
+    """Blend similarity signals (0..1)."""
+    tf = tfidf_cosine(a, b)
+    jac = jaccard(a, b)
+    seq = sequence_ratio(a, b)
+    kw = keyword_overlap(a, b)
+    return round(0.40 * tf + 0.25 * jac + 0.20 * seq + 0.15 * kw, 4)
 
 
 # --- Optional embedding upgrade -------------------------------------------

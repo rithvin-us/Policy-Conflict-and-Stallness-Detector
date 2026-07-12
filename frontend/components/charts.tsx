@@ -5,7 +5,11 @@ import {
   AreaChart,
   Bar,
   BarChart,
+  CartesianGrid,
   Cell,
+  Legend,
+  Line,
+  LineChart,
   ResponsiveContainer,
   Tooltip,
   XAxis,
@@ -69,3 +73,21 @@ const tooltipStyle = {
   fontSize: 12,
   color: "#e2e8f0",
 };
+
+export function GovernanceHistoryChart({ data }: { data: any[] }) {
+  return (
+    <ResponsiveContainer width="100%" height={300}>
+      <LineChart data={data} margin={{ top: 20, right: 30, left: -20, bottom: 0 }}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#ffffff0a" vertical={false} />
+        <XAxis dataKey="date" tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} minTickGap={30} />
+        <YAxis tick={{ fill: "#64748b", fontSize: 11 }} axisLine={false} tickLine={false} />
+        <Tooltip contentStyle={tooltipStyle} cursor={{ stroke: "#ffffff1a" }} />
+        <Legend wrapperStyle={{ fontSize: 11, color: "#94a3b8" }} />
+        <Line type="monotone" dataKey="score" stroke="#5b8cff" strokeWidth={2} dot={false} name="Governance Score" />
+        <Line type="monotone" dataKey="finding_count" stroke="#f5a524" strokeWidth={2} dot={false} name="Conflict Trend" />
+        <Line type="monotone" dataKey="high_severity_count" stroke="#f0476b" strokeWidth={2} dot={false} name="Critical Findings" />
+        <Line type="monotone" dataKey="stale_policies" stroke="#94a3b8" strokeWidth={2} dot={false} name="Staleness Trend" />
+      </LineChart>
+    </ResponsiveContainer>
+  );
+}

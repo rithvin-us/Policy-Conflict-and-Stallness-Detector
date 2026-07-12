@@ -45,6 +45,7 @@ def explain_conflict(c: Conflict) -> dict[str, Any]:
         "likely_resolution": c.resolution_suggestion,
         "compliance_refs": c.compliance_impact,
         "confidence": c.confidence,
+        "confidence_factors": c.confidence_factors,
     }
 
 
@@ -58,4 +59,5 @@ def explain_staleness(s: StalenessFinding) -> dict[str, Any]:
         "likely_resolution": s.recommendation,
         "compliance_refs": ["ISO 27001 A.5.2"],
         "confidence": 0.95,
+        "confidence_factors": s.confidence_factors,
     }
