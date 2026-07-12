@@ -8,6 +8,15 @@ import { GovernanceGauge } from "@/components/GovernanceGauge";
 import { SeverityBars, GovernanceHistoryChart } from "@/components/charts";
 import { Panel, SeverityChip, scoreColor } from "@/components/ui";
 
+import { 
+  FileText, 
+  AlertTriangle, 
+  Copy, 
+  Clock, 
+  Network, 
+  ShieldCheck 
+} from "lucide-react";
+
 export default function OverviewPage() {
   const ov = useApi(() => api.overview(), []);
   const queue = useApi(() => api.reviewQueue(), []);
@@ -46,7 +55,7 @@ export default function OverviewPage() {
               <SubScore label="Topic coverage" value={g?.coverage ?? 0} good />
             </div>
           </div>
-          <div className="mt-4 border-t border-white/5 pt-3">
+          <div className="mt-4 border-t border-ink-800 pt-3">
             <div className="stat-label mb-1">30-day Trend</div>
             {hist.data?.length ? <GovernanceHistoryChart data={hist.data} /> : <Empty />}
           </div>
@@ -54,12 +63,12 @@ export default function OverviewPage() {
 
         {/* KPI tiles */}
         <div className="col-span-12 grid grid-cols-2 gap-4 lg:col-span-5 lg:grid-cols-2">
-          <Kpi label="Policies" value={c?.policies} href="/policies" glyph="▤" />
-          <Kpi label="Conflicts" value={c?.conflicts} href="/conflicts" glyph="⚡" tone="high" />
-          <Kpi label="Redundancies" value={c?.redundancies} href="/conflicts" glyph="⧉" tone="medium" />
-          <Kpi label="Stale policies" value={c?.stale} href="/staleness" glyph="◷" tone="medium" />
-          <Kpi label="Obligations" value={c?.obligations} href="/graph" glyph="≣" />
-          <Kpi label="Coverage" value={g ? `${g.coverage}%` : undefined} href="/compliance" glyph="✓" tone="ok" />
+          <Kpi label="Policies" value={c?.policies} href="/policies" icon={FileText} />
+          <Kpi label="Conflicts" value={c?.conflicts} href="/conflicts" icon={AlertTriangle} tone="high" />
+          <Kpi label="Redundancies" value={c?.redundancies} href="/conflicts" icon={Copy} tone="medium" />
+          <Kpi label="Stale policies" value={c?.stale} href="/staleness" icon={Clock} tone="medium" />
+          <Kpi label="Obligations" value={c?.obligations} href="/graph" icon={Network} />
+          <Kpi label="Coverage" value={g ? `${g.coverage}%` : undefined} href="/compliance" icon={ShieldCheck} tone="ok" />
         </div>
 
         {/* Severity distribution */}
@@ -73,7 +82,7 @@ export default function OverviewPage() {
         <Panel
           className="col-span-12 lg:col-span-7"
           title="Priority Review Queue"
-          action={<Link href="/conflicts" className="text-xs text-accent hover:underline">open all →</Link>}
+          action={<Link href="/conflicts" className="text-xs text-accent hover:underline font-semibold">open all →</Link>}
         >
           <div className="space-y-2">
             {(queue.data?.items || []).slice(0, 6).map((item, i) => (
@@ -82,20 +91,20 @@ export default function OverviewPage() {
                 initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: i * 0.04 }}
-                className="flex items-center gap-3 rounded-lg border border-white/5 bg-ink-850/50 px-3 py-2.5"
+                className="flex items-center gap-3 rounded-lg border border-ink-800 bg-ink-950 px-3 py-2.5 shadow-sm"
               >
                 <div className="w-10 text-center">
-                  <div className="text-sm font-semibold" style={{ color: scoreColor(100 - item.risk) }}>
+                  <div className="text-sm font-bold" style={{ color: scoreColor(100 - item.risk) }}>
                     {Math.round(item.risk)}
                   </div>
                   <div className="stat-label">risk</div>
                 </div>
                 <div className="min-w-0 flex-1">
-                  <div className="truncate text-sm text-slate-200">{item.title}</div>
+                  <div className="truncate text-sm font-medium text-slate-800">{item.title}</div>
                   <div className="truncate text-xs text-slate-500">{item.summary}</div>
                 </div>
                 <SeverityChip severity={item.severity} />
-                <span className="chip bg-white/5 text-slate-400 ring-1 ring-white/10">{item.kind}</span>
+                <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">{item.kind}</span>
               </motion.div>
             ))}
             {queue.data && queue.data.items.length === 0 && <Empty label="No open findings" />}
@@ -104,13 +113,13 @@ export default function OverviewPage() {
 
         {/* Timeline */}
         <Panel className="col-span-12 lg:col-span-5" title="Activity Timeline">
-          <ol className="relative space-y-4 border-l border-white/10 pl-4">
+          <ol className="relative space-y-4 border-l border-ink-800 pl-4">
             {(tl.data?.items || []).map((e) => (
               <li key={e.id} className="relative">
                 <span className="absolute -left-[21px] top-1 h-2 w-2 rounded-full bg-accent/70 ring-2 ring-ink-900" />
-                <div className="text-sm text-slate-200">{e.title}</div>
+                <div className="text-sm font-medium text-slate-800">{e.title}</div>
                 {e.detail && <div className="text-xs text-slate-500">{e.detail}</div>}
-                <div className="mono mt-0.5 text-[0.68rem] text-slate-600">
+                <div className="mono mt-0.5 text-[0.68rem] text-slate-500">
                   {e.kind} · {e.at ? new Date(e.at).toLocaleString() : ""}
                 </div>
               </li>
@@ -121,7 +130,7 @@ export default function OverviewPage() {
       </div>
 
       {(ov.error || conflicts.error) && (
-        <div className="rounded-lg border border-severity-high/30 bg-severity-high/10 p-3 text-sm text-severity-high">
+        <div className="rounded-lg border border-severity-high/30 bg-severity-high/10 p-3 text-sm font-medium text-severity-high">
           Backend unreachable — start the API on :8000. ({ov.error || conflicts.error})
         </div>
       )}
@@ -132,8 +141,8 @@ export default function OverviewPage() {
 function PageHead({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div>
-      <h1 className="text-xl font-semibold text-slate-100">{title}</h1>
-      <p className="mt-1 text-sm text-slate-500">{subtitle}</p>
+      <h1 className="text-2xl font-bold font-heading text-slate-900 tracking-tight">{title}</h1>
+      <p className="mt-1 text-sm text-slate-500 font-medium">{subtitle}</p>
     </div>
   );
 }
@@ -142,11 +151,11 @@ function SubScore({ label, value, good }: { label: string; value: number; good?:
   const color = good ? scoreColor(value) : scoreColor(100 - value);
   return (
     <div>
-      <div className="mb-1 flex items-center justify-between text-xs">
-        <span className="text-slate-400">{label}</span>
-        <span className="mono" style={{ color }}>{value}</span>
+      <div className="mb-1 flex items-center justify-between text-xs font-medium">
+        <span className="text-slate-600">{label}</span>
+        <span className="mono font-semibold" style={{ color }}>{value}</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-white/5">
+      <div className="h-1.5 overflow-hidden rounded-full bg-ink-800">
         <motion.div
           className="h-full rounded-full"
           style={{ background: color }}
@@ -163,34 +172,34 @@ function Kpi({
   label,
   value,
   href,
-  glyph,
+  icon: Icon,
   tone = "default",
 }: {
   label: string;
   value?: number | string;
   href: string;
-  glyph: string;
+  icon: React.ElementType;
   tone?: "default" | "high" | "medium" | "ok";
 }) {
   const toneColor = {
-    default: "#8fb0ff",
-    high: "#f0476b",
-    medium: "#f5a524",
-    ok: "#2dd4a7",
+    default: "#3b82f6", // accent.soft
+    high: "#e11d48",
+    medium: "#d97706",
+    ok: "#059669",
   }[tone];
   return (
-    <Link href={href} className="panel panel-pad group transition hover:shadow-glow">
+    <Link href={href} className="panel panel-pad group transition hover:shadow-glow bg-ink-950">
       <div className="flex items-start justify-between">
         <span className="stat-label">{label}</span>
-        <span className="text-lg opacity-70" style={{ color: toneColor }}>{glyph}</span>
+        <Icon size={20} style={{ color: toneColor }} className="opacity-80" />
       </div>
-      <div className="mt-3 text-3xl font-semibold text-slate-100">
-        {value ?? <span className="text-slate-600">—</span>}
+      <div className="mt-3 text-3xl font-bold font-heading tracking-tight text-slate-900">
+        {value ?? <span className="text-slate-400">—</span>}
       </div>
     </Link>
   );
 }
 
 function Empty({ label = "No data" }: { label?: string }) {
-  return <div className="py-6 text-center text-sm text-slate-600">{label}</div>;
+  return <div className="py-6 text-center text-sm font-medium text-slate-500">{label}</div>;
 }

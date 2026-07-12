@@ -10,20 +10,23 @@
 @layer base {
   html,
   body {
-    @apply bg-ink-950 text-slate-200 antialiased;
+    @apply bg-ink-900 text-slate-800 antialiased;
     background-image:
-      radial-gradient(1200px 600px at 100% -10%, rgba(91, 140, 255, 0.08), transparent),
-      radial-gradient(900px 500px at -10% 110%, rgba(45, 212, 167, 0.05), transparent);
+      radial-gradient(1200px 600px at 100% -10%, rgba(30, 58, 138, 0.04), transparent),
+      radial-gradient(900px 500px at -10% 110%, rgba(5, 150, 105, 0.02), transparent);
     background-attachment: fixed;
   }
   ::selection {
-    @apply bg-accent/30;
+    @apply bg-accent/20;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading text-slate-900 tracking-tight;
   }
 }
 
 @layer components {
   .panel {
-    @apply rounded-xl border border-white/5 bg-ink-900/70 shadow-panel backdrop-blur-sm;
+    @apply rounded-xl border border-ink-800 bg-ink-950 shadow-panel backdrop-blur-md;
   }
   .panel-pad {
     @apply p-5;
@@ -35,20 +38,20 @@
     @apply font-mono text-[0.78rem] tracking-tight;
   }
   .kbd {
-    @apply rounded border border-white/10 bg-ink-800 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-400;
+    @apply rounded border border-ink-700 bg-ink-850 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600;
   }
   .navlink {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-400
-           transition hover:bg-white/5 hover:text-slate-100;
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500
+           transition hover:bg-ink-850 hover:text-slate-900;
   }
   .navlink-active {
-    @apply bg-accent/10 text-accent-soft shadow-[inset_0_0_0_1px_rgba(91,140,255,0.25)];
+    @apply bg-accent/5 text-accent shadow-[inset_0_0_0_1px_rgba(30,58,138,0.1)];
   }
   .stat-label {
-    @apply text-[0.68rem] uppercase tracking-[0.14em] text-slate-500;
+    @apply text-[0.68rem] uppercase tracking-[0.14em] text-slate-500 font-semibold;
   }
   .table-head {
-    @apply sticky top-0 z-10 bg-ink-850/95 text-[0.68rem] uppercase tracking-wider text-slate-500 backdrop-blur;
+    @apply sticky top-0 z-10 bg-ink-950/95 text-[0.68rem] uppercase tracking-wider text-slate-500 backdrop-blur border-b border-ink-800;
   }
 }
 

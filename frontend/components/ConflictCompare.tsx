@@ -5,6 +5,7 @@ import { motion } from "framer-motion";
 import type { Conflict, ExplanationPayload } from "@/lib/types";
 import { api } from "@/lib/api";
 import { Panel, SeverityChip, TypeTag } from "./ui";
+import { CheckCircle2, ShieldAlert } from "lucide-react";
 
 // Renders a quote with trigger terms highlighted, using the [start,end] spans
 // from the explanation payload (server-computed so highlighting is exact).
@@ -16,7 +17,7 @@ function Highlighted({ quote, spans }: { quote: string; spans: [number, number][
   sorted.forEach(([s, e], i) => {
     if (s > cursor) out.push(<span key={`t${i}`}>{quote.slice(cursor, s)}</span>);
     out.push(
-      <mark key={`m${i}`} className="rounded bg-severity-high/25 px-0.5 text-severity-high">
+      <mark key={`m${i}`} className="rounded bg-severity-high/20 px-0.5 font-medium text-severity-high">
         {quote.slice(s, e)}
       </mark>,
     );
@@ -40,15 +41,15 @@ function PolicySide({
   spans: [number, number][];
 }) {
   return (
-    <div className="flex-1 rounded-lg border border-white/5 bg-ink-850/60 p-4">
+    <div className="flex-1 rounded-lg border border-ink-800 bg-ink-950 p-4 shadow-sm">
       <div className="mb-2 flex items-center justify-between">
-        <span className="text-sm font-medium text-slate-200">{title || policyId}</span>
+        <span className="text-sm font-bold text-slate-900">{title || policyId}</span>
         {section && <span className="kbd">§{section}</span>}
       </div>
-      <p className="text-sm leading-relaxed text-slate-300">
+      <p className="text-sm leading-relaxed text-slate-700">
         <Highlighted quote={quote} spans={spans} />
       </p>
-      <div className="mono mt-3 text-[0.66rem] text-slate-600">{policyId}</div>
+      <div className="mono mt-3 text-[0.66rem] text-slate-500">{policyId}</div>
     </div>
   );
 }
@@ -82,10 +83,10 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
       <div className="flex flex-wrap items-center gap-2">
         <SeverityChip severity={conflict.severity} />
         <TypeTag label={conflict.conflict_type} />
-        <span className="chip bg-white/5 text-slate-400 ring-1 ring-white/10">
+        <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">
           confidence {Math.round(conflict.confidence * 100)}%
         </span>
-        <span className="chip bg-white/5 text-slate-400 ring-1 ring-white/10">
+        <span className="chip bg-ink-900 text-slate-600 ring-1 ring-ink-800">
           risk {Math.round(conflict.risk)}
         </span>
       </div>
@@ -99,8 +100,8 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
           spans={spanA?.highlight || []}
         />
         <div className="grid place-items-center px-1">
-          <span className="rounded-full bg-severity-high/15 px-2 py-1 text-xs font-semibold text-severity-high">
-            ⚡ vs
+          <span className="flex items-center gap-1 rounded-full bg-severity-high/15 px-2.5 py-1 text-xs font-bold uppercase tracking-widest text-severity-high">
+            <ShieldAlert size={14} /> VS
           </span>
         </div>
         <PolicySide
@@ -112,13 +113,13 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
         />
       </div>
 
-      <Panel title="Why this was flagged">
-        <p className="text-sm leading-relaxed text-slate-300">
+      <Panel title="Analysis Details">
+        <p className="text-sm leading-relaxed text-slate-700 font-medium">
           {ep?.why_flagged || conflict.explanation}
         </p>
         {conflict.scope_analysis && (
-          <p className="mt-3 rounded-lg border border-severity-medium/20 bg-severity-medium/5 p-3 text-sm text-severity-medium">
-            <span className="font-medium">Scope analysis: </span>
+          <p className="mt-3 rounded-lg border border-severity-medium/30 bg-severity-medium/10 p-3 text-sm text-severity-medium font-medium">
+            <span className="font-bold">Scope analysis: </span>
             {conflict.scope_analysis}
           </p>
         )}
@@ -129,24 +130,24 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
               <button 
                 onClick={getSuggestion} 
                 disabled={loadingAi}
-                className="text-accent text-[0.65rem] hover:underline bg-accent/10 px-1.5 py-0.5 rounded transition disabled:opacity-50"
+                className="text-accent text-[0.65rem] hover:underline bg-accent/10 px-2 py-1 rounded transition disabled:opacity-50 font-semibold"
               >
-                {loadingAi ? "Thinking..." : "✨ Ask AI"}
+                {loadingAi ? "Analyzing dependencies..." : "Generate Remediation Strategy"}
               </button>
             </div>
             {aiSuggestion ? (
-              <div className="text-sm text-accent bg-accent/5 p-2 rounded border border-accent/20">
+              <div className="text-sm text-accent bg-accent/5 p-3 rounded-lg border border-accent/20 font-medium leading-relaxed">
                 {aiSuggestion}
               </div>
             ) : (
-              <p className="text-sm text-slate-300">{conflict.resolution_suggestion}</p>
+              <p className="text-sm text-slate-700 font-medium">{conflict.resolution_suggestion}</p>
             )}
           </div>
           <div>
             <div className="stat-label mb-1">Compliance impact</div>
             <div className="flex flex-wrap gap-1.5">
               {(conflict.compliance_impact || []).map((r) => (
-                <span key={r} className="chip bg-accent/10 text-accent-soft ring-1 ring-accent/20">
+                <span key={r} className="chip bg-accent/10 text-accent font-semibold ring-1 ring-accent/20">
                   {r}
                 </span>
               ))}
@@ -158,7 +159,7 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
             <div className="stat-label mb-1">Trigger terms</div>
             <div className="flex flex-wrap gap-1.5">
               {ep.trigger_terms.map((t) => (
-                <span key={t} className="mono rounded bg-severity-high/10 px-1.5 py-0.5 text-severity-high">
+                <span key={t} className="mono rounded bg-severity-high/15 px-1.5 py-0.5 font-bold text-severity-high">
                   {t}
                 </span>
               ))}
@@ -168,10 +169,10 @@ export function ConflictCompare({ conflict }: { conflict: Conflict }) {
         {ep?.confidence_factors?.length ? (
           <div className="mt-4">
             <div className="stat-label mb-1">Confidence Breakdown</div>
-            <ul className="text-sm text-slate-300 space-y-1">
+            <ul className="text-sm text-slate-700 space-y-1.5 font-medium">
               {ep.confidence_factors.map((factor) => (
                 <li key={factor} className="flex items-center gap-2">
-                  <span className="text-severity-low">✔</span> {factor}
+                  <CheckCircle2 size={16} className="text-severity-low" /> {factor}
                 </li>
               ))}
             </ul>

@@ -1,6 +1,10 @@
 import type { Metadata } from "next";
+import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/Sidebar";
+
+const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
+const outfit = Outfit({ subsets: ["latin"], variable: "--font-heading" });
 
 export const metadata: Metadata = {
   title: "Policy Guardian AI — Governance Console",
@@ -14,9 +18,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body>
-        <div className="flex h-screen overflow-hidden">
+    <html lang="en" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="font-sans">
+        <div className="flex h-screen overflow-hidden bg-ink-900">
           <Sidebar />
           <div className="flex min-w-0 flex-1 flex-col">
             <TopBar />

@@ -8,35 +8,35 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Deep slate "operations console" palette — deliberately not a generic
-        // SaaS blue/white dashboard.
+        // Elegant Light Theme palette
         ink: {
-          950: "#070a12",
-          900: "#0b1020",
-          850: "#0f1526",
-          800: "#141b30",
-          700: "#1c2540",
-          600: "#26304f",
-          500: "#3a466b",
+          950: "#ffffff",
+          900: "#fafafa",
+          850: "#f4f4f5",
+          800: "#e4e4e7",
+          700: "#d4d4d8",
+          600: "#a1a1aa",
+          500: "#71717a",
         },
         severity: {
-          high: "#f0476b",
-          medium: "#f5a524",
-          low: "#3aa0ff",
-          ok: "#2dd4a7",
+          high: "#e11d48",   // Rose 600
+          medium: "#d97706", // Amber 600
+          low: "#2563eb",    // Blue 600
+          ok: "#059669",     // Emerald 600
         },
         accent: {
-          DEFAULT: "#5b8cff",
-          soft: "#8fb0ff",
+          DEFAULT: "#1e3a8a", // Deep Blue 900
+          soft: "#3b82f6",    // Blue 500
         },
       },
       fontFamily: {
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
         sans: ["var(--font-sans)", "ui-sans-serif", "system-ui", "sans-serif"],
+        heading: ["var(--font-heading)", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        panel: "0 1px 0 0 rgba(255,255,255,0.04) inset, 0 8px 30px rgba(0,0,0,0.35)",
-        glow: "0 0 0 1px rgba(91,140,255,0.35), 0 0 24px rgba(91,140,255,0.25)",
+        panel: "0 4px 20px rgba(0, 0, 0, 0.04)",
+        glow: "0 0 0 1px rgba(30,58,138,0.1), 0 4px 24px rgba(30,58,138,0.08)",
       },
       keyframes: {
         pulseline: {
