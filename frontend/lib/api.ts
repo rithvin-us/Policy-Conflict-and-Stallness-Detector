@@ -60,6 +60,8 @@ export const api = {
     ),
   uploadPolicy: (body: Record<string, unknown>) =>
     req<Policy>("/policies/upload", { method: "POST", body: JSON.stringify(body) }),
+  deletePolicy: (id: string) =>
+    req<void>(`/policies/${id}`, { method: "DELETE" }),
 
   conflicts: (q = "") => req<List<Conflict>>(`/conflicts${q}`),
   conflict: (id: string) => req<Conflict>(`/conflicts/${id}`),

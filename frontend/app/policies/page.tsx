@@ -9,6 +9,20 @@ import { Panel, scoreColor } from "@/components/ui";
 export default function PoliciesPage() {
   const { data, reload } = useApi(() => api.policies(), []);
   const [open, setOpen] = useState(false);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this policy?")) return;
+    setDeletingId(id);
+    try {
+      await api.deletePolicy(id);
+      reload();
+    } catch (e: any) {
+      alert(`Failed to delete policy: ${e.message || e}`);
+    } finally {
+      setDeletingId(null);
+    }
+  };
   
   // Filter States
   const [search, setSearch] = useState("");
@@ -94,6 +108,7 @@ export default function PoliciesPage() {
                 <th className="px-3 py-2 text-left">Reviewed</th>
                 <th className="px-3 py-2 text-right">Obl.</th>
                 <th className="px-3 py-2 text-left">Health</th>
+                <th className="px-3 py-2 text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -117,11 +132,23 @@ export default function PoliciesPage() {
                       <span className="mono text-xs font-bold" style={{ color: scoreColor(p.health_score) }}>{p.health_score}</span>
                     </div>
                   </td>
+                  <td className="px-3 py-3 text-right">
+                    <button
+                      onClick={() => handleDelete(p.id)}
+                      disabled={deletingId === p.id}
+                      className="text-red-600 hover:text-red-800 transition-colors disabled:opacity-50"
+                      title="Delete Policy"
+                    >
+                      <svg className="w-4 h-4 inline" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </td>
                 </tr>
               ))}
               {filteredItems.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-3 py-8 text-center text-black font-medium">
+                  <td colSpan={7} className="px-3 py-8 text-center text-black font-medium">
                     No policies match your filters.
                   </td>
                 </tr>
