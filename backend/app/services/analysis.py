@@ -61,9 +61,16 @@ def _to_input(p: Policy) -> PolicyInput:
 def run_analysis(db: Session, policy_ids: list[str] | None = None) -> AnalysisRun:
     policies = db.query(Policy).all()
     if not policies:
+        # No corpus → purge any derived findings so the dashboard reads truly
+        # empty (e.g. after every source is disconnected). Without this, stale
+        # conflicts/obligations from a prior run would linger with no parent policy.
+        db.execute(delete(Obligation))
+        db.execute(delete(Conflict))
+        db.execute(delete(StalenessFinding))
         run = AnalysisRun(id=new_id("run"), governance={}, counts={})
         db.add(run)
         db.commit()
+        events.publish("analysis_complete", {"overall": None, "counts": {}})
         return run
 
     inputs = [_to_input(p) for p in policies]

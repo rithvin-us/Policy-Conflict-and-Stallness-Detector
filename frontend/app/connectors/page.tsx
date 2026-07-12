@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
+import { useEventStream } from "@/lib/useEventStream";
 import { Panel, StatusPill } from "@/components/ui";
 
 const IMPLEMENTED = new Set(["LOCAL_FOLDER", "GITHUB", "UPLOAD"]);
@@ -12,6 +13,22 @@ export default function ConnectorsPage() {
   const events = useApi(() => api.webhookEvents(), []);
   const [busy, setBusy] = useState<string | null>(null);
   const [deletedIds, setDeletedIds] = useState<Set<string>>(new Set());
+
+  useEventStream(
+    useCallback((type) => {
+      // Refresh the connectors and events tables whenever a background event occurs
+      connectors.reload();
+      events.reload();
+    }, [connectors, events])
+  );
+
+  const totalConnectors = connectors.data?.items.length || 0;
+  const healthyConnectors = connectors.data?.items.filter(c => c.status === "CONNECTED").length || 0;
+  const healthPercent = totalConnectors > 0 ? Math.round((healthyConnectors / totalConnectors) * 100) : 100;
+  
+  const totalEvents = events.data?.items.length || 0;
+  const processedEvents = events.data?.items.filter(e => e.status === "PROCESSED").length || 0;
+  const webhookPercent = totalEvents > 0 ? Math.round((processedEvents / totalEvents) * 100) : 100;
 
   async function sync(id: string) {
     setBusy(id);
@@ -85,6 +102,27 @@ export default function ConnectorsPage() {
         <p className="mt-1 text-sm text-black font-medium">
           Continuous sync from policy sources. GitHub and Local Folder are fully implemented; others are registered behind the same connector interface.
         </p>
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Repo Health</div>
+          <div className={`text-2xl font-black ${healthPercent === 100 ? "text-green-600" : "text-amber-600"}`}>{healthPercent}%</div>
+          <div className="text-[10px] font-semibold text-black mt-1">{healthyConnectors} / {totalConnectors} healthy</div>
+        </div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Webhook Health</div>
+          <div className={`text-2xl font-black ${webhookPercent === 100 ? "text-green-600" : "text-amber-600"}`}>{webhookPercent}%</div>
+          <div className="text-[10px] font-semibold text-black mt-1">{processedEvents} / {totalEvents} processed</div>
+        </div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Total Sources</div>
+          <div className="text-2xl font-black text-black">{totalConnectors}</div>
+        </div>
+        <div className="rounded-xl border border-neutral-200 bg-white p-4 shadow-sm flex flex-col items-center justify-center">
+          <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider mb-1">Total Events</div>
+          <div className="text-2xl font-black text-black">{totalEvents}</div>
+        </div>
       </div>
 
       <GitHubOnboarding onDone={() => connectors.reload()} />

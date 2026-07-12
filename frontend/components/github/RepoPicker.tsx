@@ -43,8 +43,9 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
     (r.description && r.description.toLowerCase().includes(search.toLowerCase()))
   );
 
-  const toggleRepo = (id: number) => {
+  const toggleRepo = async (id: number) => {
     const next = new Set(selectedRepoIds);
+    const repo = repos.find(r => r.id === id);
     if (next.has(id)) {
       next.delete(id);
       setRepoPaths(prev => {
@@ -55,11 +56,28 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
     } else {
       next.add(id);
       setRepoPaths(prev => ({ ...prev, [id]: "policies/" }));
+      
+      if (repo) {
+        try {
+          const treeData = await api.githubRepoTree(token, repo.full_name, repo.default_branch || "main");
+          const candidates = ["policies", "security", "governance", "docs/policies"];
+          const found = treeData.tree
+            .filter((item: any) => item.type === "tree")
+            .map((item: any) => item.path)
+            .filter((path: string) => candidates.includes(path.toLowerCase()));
+          
+          if (found.length > 0) {
+            setRepoPaths(prev => ({ ...prev, [id]: found.map((p: string) => p + "/").join(", ") }));
+          }
+        } catch (e) {
+          // ignore, keep fallback
+        }
+      }
     }
     setSelectedRepoIds(next);
   };
 
-  const toggleAll = () => {
+  const toggleAll = async () => {
     if (selectedRepoIds.size === filteredRepos.length) {
       setSelectedRepoIds(new Set());
       setRepoPaths({});
@@ -68,6 +86,7 @@ export function RepoPicker({ token, onSuccess, onCancel }: RepoPickerProps) {
       const newPaths: Record<number, string> = {};
       filteredRepos.forEach(r => newPaths[r.id] = "policies/");
       setRepoPaths(newPaths);
+      // for batch operations, we skip auto-detect to avoid rate-limiting
     }
   };
 

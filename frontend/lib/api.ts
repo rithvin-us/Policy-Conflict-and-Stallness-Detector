@@ -29,7 +29,8 @@ const BASE =
       : "/api/v1";
 
 async function req<T>(path: string, init?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const url = path.startsWith("http") ? path : `${BASE}${path}`;
+  const res = await fetch(url, {
     ...init,
     headers: { "Content-Type": "application/json", ...(init?.headers || {}) },
     cache: "no-store",
@@ -93,6 +94,10 @@ export const api = {
     req<any[]>("/github/orgs", { headers: { Authorization: `Bearer ${token}` } }),
   githubRepos: (token: string, org?: string) => 
     req<List<any>>(`/github/repos${org ? `?org=${encodeURIComponent(org)}` : ""}`, { headers: { Authorization: `Bearer ${token}` } }),
+  githubRepoContents: (token: string, full_name: string) =>
+    req<any[]>(`https://api.github.com/repos/${full_name}/contents`, { headers: { Authorization: `Bearer ${token}` } }),
+  githubRepoTree: (token: string, full_name: string, branch: string) =>
+    req<any>(`https://api.github.com/repos/${full_name}/git/trees/${branch}?recursive=1`, { headers: { Authorization: `Bearer ${token}` } }),
   bulkGitHubConnect: (token: string, repos: any[]) =>
     req<any>("/connectors/bulk-github", { method: "POST", body: JSON.stringify({ github_token: token, repositories: repos }) }),
 

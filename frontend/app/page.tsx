@@ -4,28 +4,82 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import { api } from "@/lib/api";
 import { useApi } from "@/lib/useApi";
+import { useEventStream } from "@/lib/useEventStream";
+import { useCallback, useState, useEffect } from "react";
 import { GovernanceGauge } from "@/components/GovernanceGauge";
 import { SeverityBars, GovernanceHistoryChart } from "@/components/charts";
 import { Panel, SeverityChip, scoreColor } from "@/components/ui";
 
-import { 
-  FileText, 
-  AlertTriangle, 
-  Copy, 
-  Clock, 
-  Network, 
-  ShieldCheck 
+import {
+  FileText,
+  AlertTriangle,
+  Copy,
+  Clock,
+  Network,
+  ShieldCheck,
+  GitBranch,
+  FolderGit2,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 export default function OverviewPage() {
   const ov = useApi(() => api.overview(), []);
+  const connectors = useApi(() => api.connectors(), []);
   const queue = useApi(() => api.reviewQueue(), []);
   const tl = useApi(() => api.timeline(12), []);
   const conflicts = useApi(() => api.conflicts(), []);
   const hist = useApi(() => api.history(), []);
 
+  // Show a tiny status ticker when an event comes in
+  const [liveStatus, setLiveStatus] = useState<string | null>(null);
+
+  useEventStream(
+    useCallback(
+      (type, data) => {
+        if (type === "push_processed") {
+          setLiveStatus(`Live update: push processed for ${data.repo}`);
+        } else if (type === "pr_analyzed") {
+          setLiveStatus(`Live update: PR #${data.pr_number} analyzed on ${data.repo}`);
+        } else {
+          setLiveStatus(`Live update: ${type}`);
+        }
+        
+        // Auto-refresh the dashboard
+        ov.reload();
+        connectors.reload();
+        queue.reload();
+        tl.reload();
+        conflicts.reload();
+        hist.reload();
+
+        setTimeout(() => setLiveStatus(null), 5000);
+      },
+      [ov, connectors, queue, tl, conflicts, hist]
+    )
+  );
+
   const g = ov.data;
   const c = g?.counts;
+
+  // Gate the console: until a source is integrated and at least one policy is
+  // under governance, the dashboard shows nothing but an onboarding call to
+  // action. No sample data, no zeroed tiles — it waits for a real corpus.
+  const policyCount = c?.policies ?? 0;
+  const hasConnector = (connectors.data?.items?.length ?? 0) > 0;
+
+  if (ov.loading && !ov.data) {
+    return (
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-3 text-black">
+        <Loader2 className="h-6 w-6 animate-spin text-accent" />
+        <p className="text-sm font-medium">Connecting to governance engine…</p>
+      </div>
+    );
+  }
+
+  if (ov.data && policyCount === 0) {
+    return <Onboarding hasConnector={hasConnector} syncing={connectors.loading} />;
+  }
 
   const sevData = (() => {
     const items = conflicts.data?.items || [];
@@ -42,6 +96,15 @@ export default function OverviewPage() {
         title="Governance Overview"
         subtitle="Corpus-wide policy health, live conflicts, and remediation priorities."
       />
+      {liveStatus && (
+        <div className="rounded-lg border border-accent/30 bg-accent/10 px-4 py-2 text-sm font-medium text-accent animate-fade-in shadow-sm flex items-center gap-2">
+          <span className="relative flex h-2 w-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+          </span>
+          {liveStatus}
+        </div>
+      )}
 
       <div className="grid grid-cols-12 gap-6">
         {/* Governance score + subscores */}
@@ -202,4 +265,88 @@ function Kpi({
 
 function Empty({ label = "No data" }: { label?: string }) {
   return <div className="py-6 text-center text-sm font-medium text-black">{label}</div>;
+}
+
+function Onboarding({ hasConnector, syncing }: { hasConnector: boolean; syncing: boolean }) {
+  return (
+    <div className="flex min-h-[70vh] items-center justify-center px-4">
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, ease: "easeOut" }}
+        className="w-full max-w-2xl text-center"
+      >
+        <div className="mx-auto mb-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-accent/20 bg-accent/10 text-accent shadow-sm">
+          <ShieldCheck className="h-8 w-8" />
+        </div>
+
+        <h1 className="font-heading text-2xl font-bold tracking-tight text-black">
+          {hasConnector ? "No policies under governance yet" : "Connect a source to begin"}
+        </h1>
+        <p className="mx-auto mt-2 max-w-lg text-sm font-medium leading-relaxed text-black/70">
+          Sentinal analyzes only what you integrate. Connect a GitHub repository or a
+          local folder and it will ingest your policies, extract obligations, and surface
+          conflicts, redundancies, and staleness automatically — nothing is shown until then.
+        </p>
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2">
+          <OnboardCard
+            href="/connectors"
+            icon={GitBranch}
+            title="GitHub repository"
+            desc="Continuous, webhook-driven governance on every push."
+          />
+          <OnboardCard
+            href="/connectors"
+            icon={FolderGit2}
+            title="Local folder"
+            desc="Point at a directory of policy files to analyze now."
+          />
+        </div>
+
+        {hasConnector && (
+          <div className="mt-6 rounded-xl border border-accent/30 bg-accent/5 px-4 py-3 text-sm font-medium text-black">
+            {syncing
+              ? "A source is connected — checking for policies…"
+              : "A source is connected but hasn’t synced any policies yet."}{" "}
+            <Link href="/connectors" className="font-semibold text-accent hover:underline">
+              Open Sources to sync →
+            </Link>
+          </div>
+        )}
+
+        <p className="mt-8 text-xs font-medium text-black/40">
+          Deterministic engine · findings are reproducible and cite exact source text.
+        </p>
+      </motion.div>
+    </div>
+  );
+}
+
+function OnboardCard({
+  href,
+  icon: Icon,
+  title,
+  desc,
+}: {
+  href: string;
+  icon: React.ElementType;
+  title: string;
+  desc: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="group flex flex-col items-start gap-2 rounded-2xl border border-ink-800 bg-white p-5 text-left shadow-sm transition hover:border-accent/40 hover:shadow-md"
+    >
+      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ink-850 text-black transition group-hover:bg-accent/10 group-hover:text-accent">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="text-sm font-semibold text-black">{title}</div>
+      <div className="text-xs font-medium leading-snug text-black/60">{desc}</div>
+      <span className="mt-1 inline-flex items-center gap-1 text-xs font-semibold text-accent opacity-0 transition group-hover:opacity-100">
+        Connect <ArrowRight className="h-3.5 w-3.5" />
+      </span>
+    </Link>
+  );
 }
