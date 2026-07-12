@@ -10,23 +10,23 @@
 @layer base {
   html,
   body {
-    @apply bg-ink-900 text-slate-800 antialiased;
+    @apply bg-neutral-50 text-black antialiased;
     background-image:
       radial-gradient(1200px 600px at 100% -10%, rgba(30, 58, 138, 0.04), transparent),
       radial-gradient(900px 500px at -10% 110%, rgba(5, 150, 105, 0.02), transparent);
     background-attachment: fixed;
   }
   ::selection {
-    @apply bg-accent/20;
+    @apply bg-blue-500/20;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading text-slate-900 tracking-tight;
+    @apply font-heading text-black tracking-tight;
   }
 }
 
 @layer components {
   .panel {
-    @apply rounded-xl border border-ink-800 bg-ink-950 shadow-panel backdrop-blur-md;
+    @apply rounded-xl border border-neutral-200 bg-white shadow-sm;
   }
   .panel-pad {
     @apply p-5;
@@ -38,26 +38,26 @@
     @apply font-mono text-[0.78rem] tracking-tight;
   }
   .kbd {
-    @apply rounded border border-ink-700 bg-ink-850 px-1.5 py-0.5 font-mono text-[0.7rem] text-slate-600;
+    @apply rounded border border-neutral-300 bg-neutral-100 px-1.5 py-0.5 font-mono text-[0.7rem] text-black;
   }
   .navlink {
-    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-slate-500
-           transition hover:bg-ink-850 hover:text-slate-900;
+    @apply flex items-center gap-3 rounded-lg px-3 py-2 text-sm text-neutral-600 font-medium
+           transition hover:bg-neutral-100 hover:text-black;
   }
   .navlink-active {
-    @apply bg-accent/5 text-accent shadow-[inset_0_0_0_1px_rgba(30,58,138,0.1)];
+    @apply bg-blue-50 text-blue-700 shadow-[inset_0_0_0_1px_rgba(59,130,246,0.2)];
   }
   .stat-label {
-    @apply text-[0.68rem] uppercase tracking-[0.14em] text-slate-500 font-semibold;
+    @apply text-[0.68rem] uppercase tracking-[0.14em] text-neutral-600 font-bold;
   }
   .table-head {
-    @apply sticky top-0 z-10 bg-ink-950/95 text-[0.68rem] uppercase tracking-wider text-slate-500 backdrop-blur border-b border-ink-800;
+    @apply sticky top-0 z-10 bg-white/95 text-[0.68rem] uppercase tracking-wider text-black font-bold backdrop-blur border-b border-neutral-200;
   }
 }
 
-.sev-high { @apply text-severity-high; }
-.sev-medium { @apply text-severity-medium; }
-.sev-low { @apply text-severity-low; }
+.sev-high { @apply text-red-600 font-bold; }
+.sev-medium { @apply text-amber-600 font-bold; }
+.sev-low { @apply text-slate-500 font-bold; }
 
 /* React Flow dark theme overrides */
 .react-flow__attribution { display: none; }
