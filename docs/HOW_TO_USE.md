@@ -40,7 +40,7 @@ docker compose up --build
 
 This brings up Postgres, Redis, the FastAPI backend, and the Next.js frontend
 together. The backend automatically seeds the sample policy corpus
-(`sample_data/policies/`) and runs the first analysis on boot, so the dashboard
+(`sample_policies/policies/`) and runs the first analysis on boot, so the dashboard
 is populated the moment it's up.
 
 - **Web console:** http://localhost:3000
@@ -72,7 +72,7 @@ npm run dev
 
 Runs at http://localhost:3000.
 
-**Run the test suite** (37 tests: AI evaluation + API + connectors):
+**Run the test suite** (49 tests: AI evaluation + API + connectors + webhooks):
 
 ```bash
 cd backend && pytest -q
@@ -161,7 +161,7 @@ curl -X POST http://localhost:8000/api/v1/policies/upload \
 This example deliberately creates a PARAMETER conflict with the seeded Password
 Policy's 90-day rule — a good way to see conflict detection fire live.
 
-**c) Drop a file in `sample_data/policies/`, then sync** the Local Folder
+**c) Drop a file in `sample_policies/policies/`, then sync** the Local Folder
 connector (`Sources & Webhooks → Sync now`, or `POST /api/v1/connectors/<id>/sync`).
 
 **d) Connect a GitHub repository** — `Sources & Webhooks → Add a source →
@@ -211,7 +211,7 @@ open  localhost:8000/docs                                    # interactive OpenA
 
 | Status | Items |
 |---|---|
-| **Implemented & runnable** | Obligation extraction; DIRECT/TEMPORAL/SCOPE/STRENGTH/PARAMETER conflict detection; redundancy; staleness (4 signals); risk + governance scoring; policy & obligation graphs; explainable findings; compliance mapping; MD/HTML/JSON reports; GitHub + Local Folder + Upload connectors; webhook ingestion + re-analysis; compliance-manager notifications; full dashboard console; Docker + CI + 37 tests |
+| **Implemented & runnable** | Obligation extraction; DIRECT/TEMPORAL/SCOPE/STRENGTH/PARAMETER conflict detection; redundancy; staleness (4 signals); risk + governance scoring; policy & obligation graphs; explainable findings; compliance mapping; MD/HTML/JSON reports; GitHub + Local Folder + Upload connectors; webhook ingestion + re-analysis; compliance-manager notifications; full dashboard console; Docker + CI + 49 tests |
 | **Stubbed (same interface, `NOT_CONFIGURED`)** | GitLab, Bitbucket, Google Drive, OneDrive, SharePoint, Slack, Teams connectors |
 | **Roadmap** | Embeddings/LLM semantic upgrade (interface already wired, opt-in); version-diff conflict introduction; natural-language policy query; automated harmonization rewrites; PDF/DOCX ingestion; RBAC/SSO; multi-tenant |
 

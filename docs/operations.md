@@ -8,7 +8,7 @@ database. "Removing stale data" = deleting the DB; it re-seeds fresh on next boo
 ```bash
 # SQLite (local dev): just delete the file, then restart the API.
 rm -f backend/policyguardian.db
-uvicorn app.main:app --reload      # re-seeds sample_data/policies + re-analyzes
+uvicorn app.main:app --reload      # re-seeds sample_policies/policies + re-analyzes
 
 # Docker Compose (Postgres): drop the volume.
 docker compose down -v && docker compose up --build
@@ -73,7 +73,7 @@ curl -X POST http://localhost:8000/api/v1/policies/upload \
 (This example creates a PARAMETER conflict with the Password Policy's 90-day rule.)
 
 ### c) Drop a file in the local corpus, then sync
-1. Add a `.md` (or `.txt`) file to `sample_data/policies/` — optionally with the
+1. Add a `.md` (or `.txt`) file to `sample_policies/policies/` — optionally with the
    frontmatter block used by the seed files (`id`, `title`, `owner`,
    `last_reviewed`, `tags`). A bare `Section X: ... must ...` body also works.
 2. Trigger the Local Folder connector to re-ingest:

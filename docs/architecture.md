@@ -27,7 +27,7 @@ x# Architecture — Sentinal
 ```
 PolicyConflictDetection/
 ├── docs/                     # Agent A — SRS, contracts, architecture, roadmap
-├── sample_data/policies/     # seed corpus (shared test fixtures)
+├── sample_policies/policies/     # seed corpus (shared test fixtures)
 ├── backend/
 │   └── app/
 │       ├── main.py           # FastAPI app factory + router mount

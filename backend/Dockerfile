@@ -1,6 +1,6 @@
 # Policy Guardian AI — backend image.
 # NOTE: build with the repository ROOT as context so both `backend/` and
-# `sample_data/` are available, e.g.:
+# `sample_policies/` are available, e.g.:
 #   docker build -f backend/Dockerfile -t policy-guardian-api .
 FROM python:3.12-slim
 
@@ -17,9 +17,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # App source + the sample corpus used for first-boot seeding.
 COPY backend/app ./app
 COPY backend/pytest.ini .
-COPY sample_data /sample_data
+COPY sample_policies /sample_policies
 
-ENV SEED_POLICY_DIR=/sample_data/policies \
+ENV SEED_POLICY_DIR=/sample_policies/policies \
     DATABASE_URL=sqlite:////app/policyguardian.db
 
 EXPOSE 8000

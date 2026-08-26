@@ -1,44 +1,94 @@
 name: CI
 
+# Runs on the mainlines, on every PR, on the automation feature branches, and
+# on demand. Keeps the whole pipeline verifiable before anything reaches
+# production (Render backend / Vercel frontend).
 on:
   push:
-    branches: [main, master]
+    branches: [main, master, "claude/**"]
   pull_request:
+  workflow_dispatch:
+
+# One in-flight run per ref; a new push cancels the previous run.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+# Least privilege — CI only needs to read the repo.
+permissions:
+  contents: read
+
+env:
+  # Fixed reference date so staleness assertions stay deterministic (SRS NFR-2).
+  ANALYSIS_AS_OF: "2026-07-11"
 
 jobs:
   backend:
-    name: Backend — lint & test
+    name: Backend — lint, test & smoke
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
       - name: Install
         working-directory: backend
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt ruff
-      - name: Lint
+      - name: Lint — pyflakes (blocking; real errors only)
+        working-directory: backend
+        # F-codes catch genuine defects (unused imports, undefined names, dead
+        # assignments). These must stay clean.
+        run: ruff check app --select F
+      - name: Lint — full ruleset (advisory)
         working-directory: backend
         run: ruff check app || true
       - name: Test
         working-directory: backend
-        env:
-          ANALYSIS_AS_OF: "2026-07-11"
         run: pytest -q
+      - name: Smoke — boot the production start command and probe health
+        working-directory: backend
+        env:
+          # Seed on so the smoke test also proves the corpus path resolves and
+          # the full ingest → analyze pipeline runs on a real ASGI startup.
+          SEED_ON_STARTUP: "1"
+          DATABASE_URL: "sqlite:///./ci_smoke.db"
+        run: |
+          set -euo pipefail
+          uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+          SERVER_PID=$!
+          trap "kill $SERVER_PID 2>/dev/null || true" EXIT
+          # Wait for the server to accept connections (fails the job if it never does).
+          curl -sf --retry 30 --retry-delay 1 --retry-connrefused \
+            http://127.0.0.1:8000/health -o /dev/null
+          echo "health:  $(curl -sf http://127.0.0.1:8000/health)"
+          echo "ready:   $(curl -sf http://127.0.0.1:8000/ready)"
+          curl -sf http://127.0.0.1:8000/api/v1/meta -o /dev/null
+          # The seeded corpus must have produced at least one policy.
+          POLICIES=$(curl -sf http://127.0.0.1:8000/api/v1/dashboard/overview \
+            | python -c "import sys,json;print(json.load(sys.stdin)['counts']['policies'])")
+          echo "seeded policies: $POLICIES"
+          test "$POLICIES" -ge 1
 
   frontend:
-    name: Frontend — build & typecheck
+    name: Frontend — lint, typecheck & build
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - name: Install
         working-directory: frontend
-        run: npm install
+        run: npm ci || npm install
+      - name: Lint
+        working-directory: frontend
+        run: npm run lint
       - name: Typecheck
         working-directory: frontend
         run: npm run typecheck
@@ -47,11 +97,22 @@ jobs:
         run: npm run build
 
   docker:
-    name: Docker images build
+    name: Docker — build & boot images
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - name: Build backend image
         run: docker build -f backend/Dockerfile -t policy-guardian-api .
+      - name: Boot backend image & healthcheck
+        run: |
+          set -euo pipefail
+          docker run -d --name pg-api -p 8000:8000 policy-guardian-api
+          # Give the container time to come up, then verify /health responds.
+          if ! curl -sf --retry 30 --retry-delay 2 --retry-connrefused \
+                 http://127.0.0.1:8000/health -o /dev/null; then
+            echo "backend container failed to become healthy"; docker logs pg-api; exit 1
+          fi
+          echo "backend image healthy: $(curl -sf http://127.0.0.1:8000/health)"
+          docker rm -f pg-api
       - name: Build frontend image
         run: docker build -f frontend/Dockerfile -t policy-guardian-web .

@@ -8,7 +8,7 @@ from app.ai_engine import types as T
 from app.ai_engine.lexicon import COMPLIANCE_BY_TOPIC, FRAMEWORK_CLAUSES
 from app.connectors.manager import ConnectorManager
 from app.core.db import get_db
-from app.models import Conflict, Obligation, Policy, StalenessFinding, TimelineEvent
+from app.models import Conflict, Obligation, TimelineEvent
 from app.schemas import timeline_to_dict
 from app.services.analysis import latest_run
 
@@ -77,8 +77,6 @@ def compliance_coverage(db: Session = Depends(get_db)) -> dict:
     for framework, clauses in FRAMEWORK_CLAUSES.items():
         clause_rows = []
         for clause, title in clauses.items():
-            key = f"{framework} {clause}" if not clause.startswith(("A.", "Art.")) \
-                else f"{framework} {clause}"
             # Match against the short forms used in COMPLIANCE_BY_TOPIC.
             covered_policies = _match_clause(touched, framework, clause)
             clause_rows.append({

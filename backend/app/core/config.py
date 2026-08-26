@@ -51,7 +51,7 @@ class Settings:
     # Seed corpus disabled by default — dashboard starts empty. Set to "1" for local dev demos.
     SEED_ON_STARTUP = os.getenv("SEED_ON_STARTUP", "0") == "1"
     SEED_POLICY_DIR = os.getenv(
-        "SEED_POLICY_DIR", str(REPO_ROOT / "sample_data" / "policies")
+        "SEED_POLICY_DIR", str(REPO_ROOT / "sample_policies" / "policies")
     )
 
     # Fixed reference date for deterministic staleness (falls back to today()).

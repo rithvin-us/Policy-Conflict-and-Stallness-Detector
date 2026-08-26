@@ -297,7 +297,7 @@ Create a `.env` file in the root directory:
 DATABASE_URL=postgresql+psycopg://policy:policy@db:5432/policyguardian
 REDIS_URL=redis://redis:6379/0
 SEED_ON_STARTUP=1
-SEED_POLICY_DIR=/sample_data/policies
+SEED_POLICY_DIR=/sample_policies/policies
 ANALYSIS_AS_OF=2026-07-11
 CORS_ORIGINS=http://localhost:3000
 
@@ -450,7 +450,7 @@ Policy-Conflict-and-Staleness-Detector/
 │   ├── roadmap.md                        # Future roadmap
 │   └── operations.md                     # Operations guide
 │
-├── 📂 sample_data/
+├── 📂 sample_policies/
 │   └── policies/                         # Seed policy corpus (test fixtures)
 │
 ├── 📂 backend/                           # FastAPI Backend
@@ -603,7 +603,7 @@ npm run typecheck         # TypeScript validation
 - ✅ Report generation (Markdown/HTML/JSON)
 - ✅ GitHub + Local Folder + Upload connectors
 - ✅ Docker deployment
-- ✅ Full test suite (37 tests)
+- ✅ Full test suite (49 tests)
 
 ### Planned Features (v1.1 – v1.5)
 
@@ -660,7 +660,7 @@ Sentinal turns a pile of contradictory, aging policies into a ranked, evidenced 
 - 📧 **Documentation**: See [docs/](docs/) for comprehensive guides
 - 🐛 **Issues**: Report bugs or request features on GitHub Issues
 - 💬 **Discussions**: Join community discussions on GitHub Discussions
-- 📖 **How to Use**: See [HOW_TO_USE.md](HOW_TO_USE.md) for step-by-step guide
+- 📖 **How to Use**: See [HOW_TO_USE.md](docs/HOW_TO_USE.md) for step-by-step guide
 
 ---
 

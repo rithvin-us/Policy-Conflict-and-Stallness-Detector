@@ -151,7 +151,7 @@ npm install
 npm run dev                     # http://localhost:3000  → Governance page
 ```
 
-The backend seeds the existing `sample_data/policies` corpus on first boot, so
+The backend seeds the existing `sample_policies/policies` corpus on first boot, so
 the dashboard is populated immediately.
 
 ### Environment (`backend/.env`)
