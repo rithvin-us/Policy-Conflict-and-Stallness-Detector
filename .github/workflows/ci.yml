@@ -62,7 +62,9 @@ jobs:
           SERVER_PID=$!
           trap "kill $SERVER_PID 2>/dev/null || true" EXIT
           # Wait for the server to accept connections (fails the job if it never does).
-          curl -sf --retry 30 --retry-delay 1 --retry-connrefused \
+          # --retry-all-errors covers connection-refused AND reset/empty-reply while
+          # the app is still binding.
+          curl -sf --retry 30 --retry-delay 1 --retry-all-errors --retry-connrefused \
             http://127.0.0.1:8000/health -o /dev/null
           echo "health:  $(curl -sf http://127.0.0.1:8000/health)"
           echo "ready:   $(curl -sf http://127.0.0.1:8000/ready)"
@@ -108,7 +110,10 @@ jobs:
           set -euo pipefail
           docker run -d --name pg-api -p 8000:8000 policy-guardian-api
           # Give the container time to come up, then verify /health responds.
-          if ! curl -sf --retry 30 --retry-delay 2 --retry-connrefused \
+          # Docker publishes the host port immediately, so an unready app yields a
+          # reset/empty-reply rather than connection-refused — --retry-all-errors
+          # retries those too (plain --retry-connrefused would give up at once).
+          if ! curl -sf --retry 30 --retry-delay 2 --retry-all-errors --retry-connrefused \
                  http://127.0.0.1:8000/health -o /dev/null; then
             echo "backend container failed to become healthy"; docker logs pg-api; exit 1
           fi
