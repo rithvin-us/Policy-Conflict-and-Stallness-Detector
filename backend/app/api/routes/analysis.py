@@ -1,6 +1,8 @@
 """Analysis + report endpoints."""
 from __future__ import annotations
 
+import os
+
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
@@ -45,6 +47,10 @@ def download_report(report_id: str, db: Session = Depends(get_db)):
     report = db.get(Report, report_id)
     if not report:
         raise HTTPException(404, f"Report {report_id} not found")
+    # On ephemeral disk (free-tier hosts) a report row can outlive its file after
+    # a restart. Return a clean 404 instead of letting FileResponse raise a 500.
+    if not report.file_path or not os.path.isfile(report.file_path):
+        raise HTTPException(404, f"Report {report_id} artifact is no longer available")
     media = {"MARKDOWN": "text/markdown", "HTML": "text/html",
              "JSON": "application/json"}.get(report.format, "text/plain")
     filename = f"{report.report_type.lower()}_{report.id}.{report.format.lower()}"

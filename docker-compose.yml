@@ -34,7 +34,7 @@ services:
       DATABASE_URL: postgresql+psycopg://policy:policy@db:5432/policyguardian
       REDIS_URL: redis://redis:6379/0
       SEED_ON_STARTUP: "1"
-      SEED_POLICY_DIR: /sample_data/policies
+      SEED_POLICY_DIR: /sample_policies/policies
       ANALYSIS_AS_OF: "2026-07-11"
       CORS_ORIGINS: http://localhost:3000
     depends_on:

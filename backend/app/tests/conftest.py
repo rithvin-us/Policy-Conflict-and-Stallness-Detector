@@ -22,7 +22,7 @@ from app.ai_engine import analyze_corpus, parse_policy  # noqa: E402
 
 AS_OF = datetime.date(2026, 7, 11)
 CORPUS_DIR = (
-    pathlib.Path(__file__).resolve().parents[3] / "sample_data" / "policies"
+    pathlib.Path(__file__).resolve().parents[3] / "sample_policies" / "policies"
 )
 
 

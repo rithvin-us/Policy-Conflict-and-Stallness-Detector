@@ -26,11 +26,18 @@ _EXTS = (".md", ".markdown", ".txt")
 class GitHubConnector(BaseConnector):
     type = "GITHUB"
 
+    #: Optional in-memory token supplied by a caller (e.g. the bulk-onboarding
+    #: endpoint) for a single request. Never persisted to the connector config
+    #: or the database, and scoped to this instance, so it is safe under
+    #: concurrency — unlike stashing the token in a shared ``os.environ`` slot.
+    token_override: str | None = None
+
     def _headers(self) -> dict[str, str]:
         headers = {"Accept": "application/vnd.github+json",
                    "X-GitHub-Api-Version": "2022-11-28"}
-        token = os.getenv(self.config.get("token_env", "GITHUB_TOKEN"), "") \
-            or settings.GITHUB_TOKEN
+        token = (self.token_override
+                 or os.getenv(self.config.get("token_env", "GITHUB_TOKEN"), "")
+                 or settings.GITHUB_TOKEN)
         if token:
             headers["Authorization"] = f"Bearer {token}"
         return headers

@@ -138,7 +138,7 @@ def test_push_ingests_only_policy_files_and_audits(client, gh_connector, monkeyp
     assert body["files"] == ["policies/password_policy.md"]
 
     # An immutable audit row exists with the commit provenance.
-    audit = client.get(f"/api/v1/audit?search=password_policy").json()
+    audit = client.get("/api/v1/audit?search=password_policy").json()
     assert audit["total"] >= 1
     row = audit["items"][0]
     assert row["commit_sha"] == "abc1234def5678"

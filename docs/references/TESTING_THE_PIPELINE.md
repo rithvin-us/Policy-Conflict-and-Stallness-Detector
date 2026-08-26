@@ -1,7 +1,7 @@
 # Testing the Continuous Governance Pipeline (end to end)
 
 This guide walks the **entire** GitHub → AI → dashboard pipeline, using the
-policy files that already exist in the repo (`sample_data/policies`). Two tracks:
+policy files that already exist in the repo (`sample_policies/policies`). Two tracks:
 
 - **Track A — Local simulation** (fastest, no GitHub account, no tunnel).
 - **Track B — Real GitHub** (push a commit to `sample_policies`, receive a real

@@ -13,7 +13,7 @@ uvicorn app.main:app --reload
 ```
 
 - API docs: http://localhost:8000/docs
-- On first boot the app seeds `../sample_data/policies`, runs analysis, and
+- On first boot the app seeds `../sample_policies/policies`, runs analysis, and
   populates the dashboard automatically — no manual steps.
 
 ## Test

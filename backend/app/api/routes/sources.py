@@ -1,21 +1,24 @@
 """Connector and webhook endpoints."""
 from __future__ import annotations
 
+import json
+import os
 from datetime import datetime, timezone
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 
-import json
-
 from app.connectors.base import ERROR, SYNCING
+from app.connectors.github import GitHubConnector
 from app.connectors.manager import ConnectorManager, connector_manager
 from app.core.config import settings
 from app.core.db import get_db
 from app.core.ids import new_id
 from app.core.logging import get_logger
-from app.models import Connector, WebhookEvent
+from app.models import Connector, Policy, WebhookEvent
 from app.schemas import (
+    BulkGitHubConnectorRequest,
     ConnectorCreateRequest,
     WebhookRegisterRequest,
     connector_to_dict,
@@ -28,6 +31,41 @@ from app.services.webhook_security import verify_github_signature
 
 router = APIRouter()
 log = get_logger("sources")
+
+# All outbound calls to the GitHub API are bounded so a slow or unreachable
+# GitHub can never hang a request-handling thread indefinitely.
+_GITHUB_HTTP_TIMEOUT = 15
+
+
+def _github_webhook_url(request: Request, connector_type: str = "github") -> str:
+    """Public URL GitHub should POST events to for this deployment."""
+    configured = getattr(settings, "API_URL", "") or ""
+    base = configured.rstrip("/") or str(request.base_url).rstrip("/")
+    return f"{base}{settings.API_PREFIX}/webhooks/{connector_type.lower()}"
+
+
+def _create_github_webhook(repo: str, token: str, webhook_url: str,
+                           event_types: list[str]) -> httpx.Response:
+    """Register a push/PR webhook on ``repo`` via the GitHub API (bounded)."""
+    return httpx.post(
+        f"https://api.github.com/repos/{repo}/hooks",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Accept": "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+        json={
+            "name": "web",
+            "active": True,
+            "events": event_types,
+            "config": {
+                "url": webhook_url,
+                "content_type": "json",
+                "secret": settings.GITHUB_WEBHOOK_SECRET,
+            },
+        },
+        timeout=_GITHUB_HTTP_TIMEOUT,
+    )
 
 
 def _sync_connector(db: Session, connector: Connector) -> dict:
@@ -98,90 +136,72 @@ def connector_health(connector_id: str, db: Session = Depends(get_db)) -> dict:
             "error_message": connector.error_message}
 
 
-from app.schemas import BulkGitHubConnectorRequest
-
 @router.post("/connectors/bulk-github", status_code=201)
 def create_bulk_github_connectors(body: BulkGitHubConnectorRequest,
                                   request: Request,
                                   db: Session = Depends(get_db)) -> dict:
-    created_connectors = []
-    
-    # 1. Create all connectors
+    """Onboard many GitHub repos at once: create a connector per repo, verify
+    reachability with the supplied token, and best-effort register a webhook.
+
+    The token is used only in-memory (per connector instance) and is never
+    written to the connector config or the database. Webhook registration is
+    fault-tolerant: an unreachable repo is reported in the response rather than
+    aborting the whole batch.
+    """
+    created_connectors: list[Connector] = []
+
+    # 1. Create + verify all connectors (token held in memory only).
     for repo_info in body.repositories:
         cfg = {
             "repo": repo_info.repo,
             "branch": repo_info.branch,
-            "paths": repo_info.paths
+            "paths": repo_info.paths,
         }
         connector = Connector(
-            id=new_id("con"), type="GITHUB", 
-            name=repo_info.repo, config=cfg, status="NOT_CONFIGURED"
+            id=new_id("con"), type="GITHUB",
+            name=repo_info.repo, config=cfg, status="NOT_CONFIGURED",
         )
-        # Verify reachability using the provided token
-        # We temporarily inject the token so the instantiate check works
-        temp_cfg = cfg.copy()
-        temp_cfg["__temp_token"] = body.github_token
-        connector.config = temp_cfg
-        impl = connector_manager.instantiate(connector)
-        # Hack to inject token to the impl
-        import os
-        os.environ["__temp_gh_token"] = body.github_token
-        impl.config["token_env"] = "__temp_gh_token"
-        
-        connector.status = impl.verify()
-        
-        # Remove temp token before saving
-        connector.config = cfg
+        impl = GitHubConnector(config=cfg)
+        impl.token_override = body.github_token  # per-instance, not persisted
+        try:
+            connector.status = impl.verify()
+        except Exception as exc:  # noqa: BLE001 - a bad repo shouldn't 500 the batch
+            connector.status = ERROR
+            connector.error_message = str(exc)
         db.add(connector)
         created_connectors.append(connector)
-        
+
     db.commit()
-    
-    # 2. Register Webhooks for all
-    base_url = str(request.base_url).rstrip("/")
-    api_url = settings.API_URL if hasattr(settings, "API_URL") and settings.API_URL else base_url
-    webhook_url = f"{api_url}/api/v1/webhooks/github"
-    
-    import httpx
-    headers = {
-        "Authorization": f"Bearer {body.github_token}",
-        "Accept": "application/vnd.github+json",
-        "X-GitHub-Api-Version": "2022-11-28"
-    }
-    
+
+    # 2. Best-effort webhook registration for each connector.
+    webhook_url = _github_webhook_url(request, "github")
+    event_types = ["push", "pull_request"]
     registered = 0
     for connector in created_connectors:
-        secret_ref = new_id("whsec")
         cfg = dict(connector.config or {})
-        cfg["webhook_secret_ref"] = secret_ref
-        cfg["webhook_events"] = ["push", "pull_request"]
+        cfg["webhook_secret_ref"] = new_id("whsec")
+        cfg["webhook_events"] = event_types
         connector.config = cfg
-        
         repo = cfg.get("repo")
-        gh_url = f"https://api.github.com/repos/{repo}/hooks"
-        gh_payload = {
-            "name": "web",
-            "active": True,
-            "events": ["push", "pull_request"],
-            "config": {
-                "url": webhook_url,
-                "content_type": "json",
-                "secret": settings.GITHUB_WEBHOOK_SECRET
-            }
-        }
-        
-        response = httpx.post(gh_url, headers=headers, json=gh_payload)
-        if response.status_code in (200, 201):
-            registered += 1
-        else:
-            log.warning(f"Failed to create webhook for {repo}", extra={"extra_fields": {"response": response.text}})
-            
+        try:
+            response = _create_github_webhook(
+                repo, body.github_token, webhook_url, event_types)
+            if response.status_code in (200, 201):
+                registered += 1
+            else:
+                log.warning("bulk webhook registration rejected",
+                            extra={"extra_fields": {"repo": repo,
+                                                    "status": response.status_code}})
+        except httpx.HTTPError as exc:
+            log.warning("bulk webhook registration failed",
+                        extra={"extra_fields": {"repo": repo, "error": str(exc)}})
+
     db.commit()
-    
+
     return {
         "created": len(created_connectors),
         "webhooks_registered": registered,
-        "items": [connector_to_dict(c) for c in created_connectors]
+        "items": [connector_to_dict(c) for c in created_connectors],
     }
 
 
@@ -200,39 +220,27 @@ def register_webhook(body: WebhookRegisterRequest,
     cfg["webhook_events"] = body.event_types
     connector.config = cfg
     db.commit()
-    
-    # Determine webhook URL
-    base_url = str(request.base_url).rstrip("/")
-    api_url = settings.API_URL if hasattr(settings, "API_URL") and settings.API_URL else base_url
-    webhook_url = f"{api_url}/api/v1/webhooks/{connector.type.lower()}"
-    
+
+    webhook_url = _github_webhook_url(request, connector.type)
+
     if body.github_token and connector.type == "GITHUB":
         repo = cfg.get("repo")
         if not repo:
             raise HTTPException(400, "Connector is missing a repository path")
-            
-        import httpx
-        gh_url = f"https://api.github.com/repos/{repo}/hooks"
-        headers = {
-            "Authorization": f"Bearer {body.github_token}",
-            "Accept": "application/vnd.github+json",
-            "X-GitHub-Api-Version": "2022-11-28"
-        }
-        gh_payload = {
-            "name": "web",
-            "active": True,
-            "events": body.event_types,
-            "config": {
-                "url": webhook_url,
-                "content_type": "json",
-                "secret": settings.GITHUB_WEBHOOK_SECRET
-            }
-        }
-        
-        response = httpx.post(gh_url, headers=headers, json=gh_payload)
+
+        try:
+            response = _create_github_webhook(
+                repo, body.github_token, webhook_url, body.event_types)
+        except httpx.HTTPError as exc:
+            log.error("webhook registration transport error",
+                      extra={"extra_fields": {"repo": repo, "error": str(exc)}})
+            raise HTTPException(502, f"Could not reach GitHub: {exc}") from exc
         if response.status_code not in (200, 201):
-            log.error("Failed to create webhook on GitHub", extra={"extra_fields": {"response": response.text}})
-            raise HTTPException(400, f"Failed to create webhook on GitHub: {response.text}")
+            log.error("GitHub rejected webhook registration",
+                      extra={"extra_fields": {"repo": repo,
+                                              "status": response.status_code}})
+            raise HTTPException(
+                400, f"Failed to create webhook on GitHub: {response.text}")
 
     return {"id": new_id("whk"), "secret_ref": secret_ref,
             "url": webhook_url,
@@ -363,12 +371,10 @@ def delete_connector(connector_id: str, db: Session = Depends(get_db)):
     elif connector.type == "LOCAL_FOLDER":
         path = (connector.config or {}).get("path")
         if path:
-            import os
             source_prefix = f"local:{os.path.basename(path)}"
 
     # If we found a prefix, delete all matching policies
     if source_prefix:
-        from app.models import Policy
         policies = db.query(Policy).filter(Policy.source.startswith(source_prefix)).all()
         for p in policies:
             db.delete(p)
